@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Custom_PostProcess_Blueprint
+  m_Shader: {fileID: 4800000, guid: 61a71714d7736484a8590af3e82997db, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _BlueprintIntensity: 1
+    - _DepthEdgeThreshold: 0.4
+    - _EdgeScale: 0.8
+    - _HatchDensity: 400
+    - _HatchShadowStart: 0
+    - _HatchStrength: 0.2
+    - _HighlightAngle: -0.66
+    - _HighlightLineDensity: 10
+    - _HighlightLineWidth: 0.49
+    - _HighlightSoftness: 0.23
+    - _HighlightStrength: 0.4
+    - _HighlightThreshold: 0.8
+    - _JitterSpeed: 0
+    - _JitterStrength: 0
+    - _NormalEdgeThreshold: 0.5
+    m_Colors:
+    - _BlueprintBaseColor: {r: 0.36419207, g: 0.3454372, b: 0.8930817, a: 1}
+  m_BuildTextureStacks: []
