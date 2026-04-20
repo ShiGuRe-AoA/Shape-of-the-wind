@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &4411984962382270482
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 7.8918037
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.5956135
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698347926961144366, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5366094100892620948, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_Name
+      value: Low Poly Cockatiel
+      objectReference: {fileID: 0}
+    - target: {fileID: 7127569904140318027, guid: 92cac29f36d55024a9de4f6663f71706,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: dc0556a6c96c8364d8830de9825432ab, type: 2}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 92cac29f36d55024a9de4f6663f71706, type: 3}

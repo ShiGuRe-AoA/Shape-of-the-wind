@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &219096635559921204
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5443904494607601417, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: e7df9f2cba8b25c48a7d693b1b3b4961, type: 2}
+    - target: {fileID: 5443904494607601417, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3085171c2910e294a90ee0cf9419b136, type: 2}
+    - target: {fileID: 7142330211872760534, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_Name
+      value: Mallard Duck
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7518046892253984876, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2a0e3544a5d65a3478a5ad347f3481de, type: 3}
