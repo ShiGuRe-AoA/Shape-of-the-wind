@@ -6,8 +6,12 @@ Shader "Custom/PostProcess/Blueprint"
         _BlueprintIntensity("Blueprint Intensity", Range(0,1)) = 1
 
         _EdgeScale("Edge Scale", Range(0,5)) = 1.5
+
+        _DepthEdgeWeight("Depth Edge Weight", Range(0, 1)) = 0.5
         _DepthEdgeThreshold("Depth Edge Threshold", Range(0.0001,1)) = 0.002
+        _NormalEdgeWeight("Normal Edge Weight",Range(0, 1)) = 0.5
         _NormalEdgeThreshold("Normal Edge Threshold", Range(0.001,1)) = 0.15
+        _LightEdgeWeight("Light Edge Weight", Range(0, 1)) = 0.5
 
         _HatchDensity("Hatch Density", Range(1,1000)) = 180
         _HatchStrength("Hatch Strength", Range(0,1)) = 0.15
@@ -18,7 +22,7 @@ Shader "Custom/PostProcess/Blueprint"
 
         _HighlightThreshold("Highlight Threshold", Range(0,1)) = 0.75
         _HighlightSoftness("Highlight Softness", Range(0.001,0.5)) = 0.08
-        _HighlightLineDensity("Highlight Line Density", Range(10,1000)) = 260
+        _HighlightLineDensity("Highlight Line Density", Range(5,1000)) = 260
         _HighlightLineWidth("Highlight Line Width", Range(0.01,0.49)) = 0.12
         _HighlightStrength("Highlight Strength", Range(0,2)) = 1.0
         _HighlightAngle("Highlight Angle", Range(-3.14159,3.14159)) = 0.9
@@ -49,17 +53,24 @@ Shader "Custom/PostProcess/Blueprint"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareNormalsTexture.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 
             TEXTURE2D_X(_SSAO_OcclusionTexture);
-            TEXTURE2D_X(_ScreenSpaceShadowmapTexture);
+            //TEXTURE2D_X(_ScreenSpaceShadowmapTexture);
             //SAMPLER(sampler_LinearClamp);
 
             float4 _BlueprintBaseColor;
             float _BlueprintIntensity;
 
             float _EdgeScale;
+
+            float _DepthEdgeWeight;
             float _DepthEdgeThreshold;
+            float _NormalEdgeWeight;
             float _NormalEdgeThreshold;
+            float _LightEdgeWeight;
 
             float _HatchDensity;
             float _HatchStrength;
@@ -193,7 +204,10 @@ Shader "Custom/PostProcess/Blueprint"
                 float diff = abs(d1 - d0) + abs(d2 - d0) + abs(d3 - d0) + abs(d4 - d0);
 
                 float threshold = _DepthEdgeThreshold * thresholdScale;
+                
                 return smoothstep(threshold, threshold * 2.0, diff);
+                //return diff;
+                
             }
 
             // ===== 法线边缘检测 ======
@@ -232,7 +246,29 @@ Shader "Custom/PostProcess/Blueprint"
                     distance(n0, n4);
 
                 float threshold = _NormalEdgeThreshold * thresholdScale;
+                
                 return smoothstep(threshold, threshold * 2.0, diff);
+                //return diff;
+            }
+
+            // ===== 主光受光边缘 =====
+            float CalcLightEdgeNdotL(float3 normalWS, float3 lightDirWS)
+            {
+                float L = saturate(dot(normalWS, lightDirWS));
+                float diff = abs(ddx(L)) + abs(ddy(L));
+                return diff;
+            }
+
+            // ===== 阴影边缘 =====
+            float CalcShadowEdge(float2 uv)
+            {
+                float rawShadow = SAMPLE_TEXTURE2D_X(_ScreenSpaceShadowmapTexture, sampler_LinearClamp, uv).r;
+
+                // 0 = 亮，1 = 阴影
+                float shadowShade = 1.0 - rawShadow;
+
+                float diff = abs(ddx(shadowShade)) + abs(ddy(shadowShade));
+                return diff;
             }
 
             // ===== 亮度检测 =====
@@ -262,22 +298,17 @@ Shader "Custom/PostProcess/Blueprint"
                 float2 hatchUV = uv * _ScreenParams.xy;
 
                 float scale1 = _HatchDensity;   // 基础密度
-                float scale2 = scale1 * 2.0;           // 极暗高密层
+                float scale2 = scale1 / 1.2;           // 极暗高密层
 
                 float hatch1 = HatchLinesAngle(hatchUV / scale1, 0.52);
-                float hatch2 = HatchLinesAngle(hatchUV / scale1, -0.44);
-                float hatch3 = HatchLinesAngle(hatchUV / scale2, 1.13);
+                float hatch2 = HatchLinesAngle(hatchUV / scale2, -0.5);
 
                 // 中暗
                 float midMask =
-                    1.0 - smoothstep(0.3, 0.75, luminance);
+                    1.0 - smoothstep(0.2, 0.5, luminance);
 
                 // 暗区
                 float darkMask =
-                    1.0 - smoothstep(0.2, 0.55, luminance);
-
-                // 极暗区
-                float deepestMask =
                     1.0 - smoothstep(0, 0.3, luminance);
 
                 // =========================
@@ -285,9 +316,8 @@ Shader "Custom/PostProcess/Blueprint"
                 // =========================
                 float hatch = 0.0;
 
-                hatch += hatch1 * midMask * 0.1;
+                hatch += hatch1 * midMask * 0.6;
                 hatch += hatch2 * darkMask * 0.3;
-                hatch += hatch3 * deepestMask * 0.5;
 
                 return hatch;
             }
@@ -342,7 +372,7 @@ Shader "Custom/PostProcess/Blueprint"
 
 
                 // 暗区
-                float darkMask = 1.0 - smoothstep(0, 0.4, luminance);
+                float darkMask = 1.0 - smoothstep(0, 0.3, luminance);
                 //float darkMask = 1.0 - smoothstep(0, 0.2, luminance);
 
                 // =========================
@@ -350,8 +380,8 @@ Shader "Custom/PostProcess/Blueprint"
                 // =========================
                 float hatch = 0.0;
 
-                hatch += hatch1 * midMask * 0.5;
-                hatch += hatch2 * darkMask;
+                hatch += hatch1 * midMask;
+                hatch += hatch2 * darkMask * 0.1;
 
                 return hatch;
             }
@@ -419,32 +449,79 @@ Shader "Custom/PostProcess/Blueprint"
                 //====================
 
                 //====================
+                // float edgeFade = GetEdgeDistanceFade(uv);
+
+                // // 远处采样半径更小，避免一脚跨过多个面
+                // // 第二个常数越小越激进
+                // float radiusScale = lerp(1.0, 0.5, edgeFade);
+
+                // // 远处阈值略微变严，避免边缘糊成片
+                // float depthThresholdScale  = lerp(1.0, 1.15, edgeFade);
+                // float normalThresholdScale = lerp(1.0, 1.35, edgeFade);
+
+                // // 分别计算
+                // float depthEdge  = CalcDepthEdge(uv, texelSize, radiusScale, depthThresholdScale);
+                // float normalEdge = CalcNormalEdge(uv, texelSize, radiusScale, normalThresholdScale);
+
+                // // 远处减少法线边缘影响，保住外轮廓但避免内部线糊成粗带
+                // float normalWeight = lerp(1.0, 0.35, edgeFade);
+
+                // // 远处整体略收一点，避免白边膨胀
+                // float edgeWeight = lerp(1.0, 0.85, edgeFade);
+
+                // float edge = saturate(max(depthEdge, normalEdge * normalWeight) * _EdgeScale * edgeWeight);
+                // //float edge = depthEdge;
+                // //float edge = normalEdge;
+                //====================
+
+                //====================
                 float edgeFade = GetEdgeDistanceFade(uv);
 
-                // 远处采样半径更小，避免一脚跨过多个面
-                // 第二个常数越小越激进
-                float radiusScale = lerp(1.0, 0.5, edgeFade);
+                float radiusScale = lerp(1.0, 0.35, edgeFade);
 
-                // 远处阈值略微变严，避免边缘糊成片
-                float depthThresholdScale  = lerp(1.0, 1.15, edgeFade);
-                float normalThresholdScale = lerp(1.0, 1.35, edgeFade);
+                float depthThresholdScale  = lerp(1.0, 1.5, edgeFade);
+                float normalThresholdScale = lerp(1.0, 1.5, edgeFade);
 
-                // 分别计算
                 float depthEdge  = CalcDepthEdge(uv, texelSize, radiusScale, depthThresholdScale);
                 float normalEdge = CalcNormalEdge(uv, texelSize, radiusScale, normalThresholdScale);
 
-                // 远处减少法线边缘影响，保住外轮廓但避免内部线糊成粗带
+                // 主光方向
+                Light mainLight = GetMainLight();
+                float3 lightDirWS = normalize(mainLight.direction);
+
+                // 如果你发现明暗反了，就改成 -mainLight.direction
+                float lightEdgeNdotL = CalcLightEdgeNdotL(normalWS, lightDirWS);
+                float lightEdgeShadow = CalcShadowEdge(uv);
+
+                // 光照边缘合并
+                float lightEdge = lightEdgeNdotL * 0.45 + lightEdgeShadow * 0.85;
+
+
+                // 远处减少深度边缘
+                float depthWeight = lerp(1.0, 0.35, edgeFade);
+                // 远处减少法线边缘，避免内部线糊成粗块
                 float normalWeight = lerp(1.0, 0.35, edgeFade);
 
-                // 远处整体略收一点，避免白边膨胀
+                // 远处也略微减少光照边缘，避免阴影边界膨胀
+                float lightWeight = lerp(1.0, 0.75, edgeFade);
+
                 float edgeWeight = lerp(1.0, 0.85, edgeFade);
 
-                float edge = saturate(max(depthEdge, normalEdge * normalWeight) * _EdgeScale * edgeWeight);
+                float outerEdge = depthEdge * depthWeight;
+                float innerEdge = normalEdge * normalWeight;
+                float illumEdge = lightEdge * lightWeight;
+
+                float edge = saturate(
+                    (outerEdge * _DepthEdgeWeight + innerEdge * _NormalEdgeWeight + illumEdge * _LightEdgeWeight)
+                    * _EdgeScale
+                    * edgeWeight
+                );
+
                 //====================
 
-                //float hatch = HatchPattern(uv,luminance);
+                float hatch = HatchPattern(uv,luminance);
                 //float hatch = HatchPatternWS(positionWS);
-                float hatch = HatchPatternTriplanar(positionWS, normalWS, luminance);
+                //float hatch = HatchPatternTriplanar(positionWS, normalWS, luminance);
                 //float hatch = HatchPatternTriplanar(positionWS, normalWS, shadow);
 
                 float shadowMask = 1.0 - smoothstep(_HatchShadowStart, 1.0, luminance);
