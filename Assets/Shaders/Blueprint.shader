@@ -2,30 +2,41 @@ Shader "Custom/PostProcess/Blueprint"
 {
     Properties
     {
+        [Header(Base)]
         _BlueprintBaseColor("Blueprint Base Color", Color) = (0.10, 0.25, 0.85, 1)
         _BlueprintIntensity("Blueprint Intensity", Range(0,1)) = 1
 
+        [Header(Edge)]
         _EdgeScale("Edge Scale", Range(0,5)) = 1.5
-
         _DepthEdgeWeight("Depth Edge Weight", Range(0, 1)) = 0.5
         _DepthEdgeThreshold("Depth Edge Threshold", Range(0.0001,1)) = 0.002
         _NormalEdgeWeight("Normal Edge Weight",Range(0, 1)) = 0.5
         _NormalEdgeThreshold("Normal Edge Threshold", Range(0.001,1)) = 0.15
         _LightEdgeWeight("Light Edge Weight", Range(0, 1)) = 0.5
 
+
+        [Header(Hatch Line)]
         _HatchDensity("Hatch Density", Range(1,1000)) = 180
         _HatchStrength("Hatch Strength", Range(0,1)) = 0.15
+        _HatchWidth("Hatch Width", Range(0.01,0.49)) = 0.12
         _HatchShadowStart("Hatch Shadow Start", Range(0,1)) = 0.35
+        _HatchShadowSoftness("Hatch Shadow Softness", Range(0.001,0.5)) = 0.08
 
-        _JitterStrength("Jitter Strength", Range(0,0.02)) = 0.0015
+        [Header(Jitter)]
+        _JitterStrength("Jitter Strength", Range(0,0.01)) = 0.0015
         _JitterSpeed("Jitter Speed", Range(0,20)) = 1.5
-
+        
+        [Header(Highlight Line)]
         _HighlightThreshold("Highlight Threshold", Range(0,1)) = 0.75
         _HighlightSoftness("Highlight Softness", Range(0.001,0.5)) = 0.08
         _HighlightLineDensity("Highlight Line Density", Range(5,1000)) = 260
         _HighlightLineWidth("Highlight Line Width", Range(0.01,0.49)) = 0.12
         _HighlightStrength("Highlight Strength", Range(0,2)) = 1.0
         _HighlightAngle("Highlight Angle", Range(-3.14159,3.14159)) = 0.9
+
+        [Header(Gradient)]
+        _Noise("Noise Texture", 2D) = "white" {}
+        _StepLim("Step Limit",Range(0,1)) = 0.5
     }
 
     SubShader
@@ -61,6 +72,9 @@ Shader "Custom/PostProcess/Blueprint"
             //TEXTURE2D_X(_ScreenSpaceShadowmapTexture);
             //SAMPLER(sampler_LinearClamp);
 
+            TEXTURE2D_X(_Noise);
+            SAMPLER(sampler_Noise);
+
             float4 _BlueprintBaseColor;
             float _BlueprintIntensity;
 
@@ -74,7 +88,9 @@ Shader "Custom/PostProcess/Blueprint"
 
             float _HatchDensity;
             float _HatchStrength;
+            float _HatchWidth;
             float _HatchShadowStart;
+            float _HatchShadowSoftness;
 
             float _JitterStrength;
             float _JitterSpeed;
@@ -85,6 +101,8 @@ Shader "Custom/PostProcess/Blueprint"
             float _HighlightLineWidth;
             float _HighlightStrength;
             float _HighlightAngle;
+
+            float _StepLim;
 
             // ===== 伪随机数 =====
             float Hash21(float2 p)
@@ -289,7 +307,7 @@ Shader "Custom/PostProcess/Blueprint"
                 p.y = uv.x * s + uv.y * c;
 
                 float v = frac(p.y);
-                return 1.0 - smoothstep(0.45, 0.55, v);
+                return 1.0 - smoothstep(_HatchWidth, _HatchWidth + 0.03, v);
             }
 
             // 法1 | 按屏幕坐标
@@ -304,20 +322,19 @@ Shader "Custom/PostProcess/Blueprint"
                 float hatch2 = HatchLinesAngle(hatchUV / scale2, -0.5);
 
                 // 中暗
-                float midMask =
-                    1.0 - smoothstep(0.2, 0.5, luminance);
+                float midMask = 1.0 - smoothstep(_HatchShadowStart, _HatchShadowStart + _HatchShadowSoftness, luminance);
 
                 // 暗区
-                float darkMask =
-                    1.0 - smoothstep(0, 0.3, luminance);
+                float darkMask = 1.0 - smoothstep(_HatchShadowStart - _HatchShadowSoftness, _HatchShadowStart + 0.5 * _HatchShadowSoftness, luminance);
 
                 // =========================
                 // 合成
                 // =========================
                 float hatch = 0.0;
 
-                hatch += hatch1 * midMask * 0.6;
-                hatch += hatch2 * darkMask * 0.3;
+                //hatch += hatch1;
+                hatch += hatch1 * midMask * 0.15;
+                hatch += hatch2 * darkMask * 0.5;
 
                 return hatch;
             }
@@ -367,12 +384,12 @@ Shader "Custom/PostProcess/Blueprint"
                 // =========================
 
                 // 中暗
-                float midMask = 1.0 - smoothstep(0.2, 0.6, luminance);
+                float midMask = 1.0 - smoothstep(_HatchShadowStart + _HatchShadowSoftness, _HatchShadowStart + 2 * _HatchShadowSoftness, luminance);
                 //float midMask = 1.0 - smoothstep(0, 0.3, luminance);
 
 
                 // 暗区
-                float darkMask = 1.0 - smoothstep(0, 0.3, luminance);
+                float darkMask = 1.0 - smoothstep(_HatchShadowStart, _HatchShadowStart + _HatchShadowSoftness - 0.1, luminance);
                 //float darkMask = 1.0 - smoothstep(0, 0.2, luminance);
 
                 // =========================
@@ -428,19 +445,21 @@ Shader "Custom/PostProcess/Blueprint"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
                 float2 uv = i.texcoord;
-                float3 positionWS = GetWorldPos(uv);
-                float3 normalWS = SampleSceneNormalSafe(uv);
+                float2 jitteredUV = JitterUV(uv);
+
+                float3 positionWS = GetWorldPos(jitteredUV);
+                float3 normalWS = SampleSceneNormalSafe(jitteredUV);
 
                 float2 texelSize = 1.0 / _ScreenParams.xy;
 
-                float2 jitteredUV = JitterUV(uv);
 
+                float3 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb;
                 float3 sceneColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, jitteredUV).rgb;
                 // 通过颜色亮度控制排线
                 float luminance = CalcLuminance(sceneColor);
                 // 通过屏幕全局光阴影控制排线
                 //float shadow = SAMPLE_TEXTURE2D_X(_ScreenSpaceShadowmapTexture, sampler_LinearClamp, uv).r;
-                float shadow = SAMPLE_TEXTURE2D_X(_SSAO_OcclusionTexture,sampler_LinearClamp,uv).r;
+                float shadow = SAMPLE_TEXTURE2D_X(_SSAO_OcclusionTexture,sampler_LinearClamp,jitteredUV).r;
 
                 //====================
                 //float depthEdge = CalcDepthEdge(uv, texelSize);
@@ -477,13 +496,13 @@ Shader "Custom/PostProcess/Blueprint"
                 //====================
                 float edgeFade = GetEdgeDistanceFade(uv);
 
-                float radiusScale = lerp(1.0, 0.35, edgeFade);
+                float radiusScale = lerp(1, 0.5, edgeFade);
 
                 float depthThresholdScale  = lerp(1.0, 1.5, edgeFade);
                 float normalThresholdScale = lerp(1.0, 1.5, edgeFade);
 
-                float depthEdge  = CalcDepthEdge(uv, texelSize, radiusScale, depthThresholdScale);
-                float normalEdge = CalcNormalEdge(uv, texelSize, radiusScale, normalThresholdScale);
+                float depthEdge  = CalcDepthEdge(jitteredUV, texelSize, radiusScale, depthThresholdScale);
+                float normalEdge = CalcNormalEdge(jitteredUV, texelSize, radiusScale, normalThresholdScale);
 
                 // 主光方向
                 Light mainLight = GetMainLight();
@@ -491,7 +510,7 @@ Shader "Custom/PostProcess/Blueprint"
 
                 // 如果你发现明暗反了，就改成 -mainLight.direction
                 float lightEdgeNdotL = CalcLightEdgeNdotL(normalWS, lightDirWS);
-                float lightEdgeShadow = CalcShadowEdge(uv);
+                float lightEdgeShadow = CalcShadowEdge(jitteredUV);
 
                 // 光照边缘合并
                 float lightEdge = lightEdgeNdotL * 0.45 + lightEdgeShadow * 0.85;
@@ -519,13 +538,19 @@ Shader "Custom/PostProcess/Blueprint"
 
                 //====================
 
-                float hatch = HatchPattern(uv,luminance);
+                float hatch = HatchPattern(jitteredUV, luminance);
                 //float hatch = HatchPatternWS(positionWS);
                 //float hatch = HatchPatternTriplanar(positionWS, normalWS, luminance);
                 //float hatch = HatchPatternTriplanar(positionWS, normalWS, shadow);
 
-                float shadowMask = 1.0 - smoothstep(_HatchShadowStart, 1.0, luminance);
-                hatch *= shadowMask * _HatchStrength;
+                float shadowMask = 1.0 - smoothstep(
+                    _HatchShadowStart - _HatchShadowSoftness, 
+                    _HatchShadowStart + _HatchShadowSoftness, 
+                    luminance
+                );
+
+                hatch *= _HatchStrength;
+                //hatch *= shadowMask * _HatchStrength;
 
                 float highlightMask = smoothstep(
                     _HighlightThreshold - _HighlightSoftness,
@@ -533,7 +558,7 @@ Shader "Custom/PostProcess/Blueprint"
                     luminance
                 );
 
-                float highlightLines = HighlightLinePattern(uv);
+                float highlightLines = HighlightLinePattern(jitteredUV);
                 highlightLines *= highlightMask * _HighlightStrength;
 
                 float3 blueprintColor = _BlueprintBaseColor.rgb;
@@ -555,7 +580,22 @@ Shader "Custom/PostProcess/Blueprint"
                 float scenePreserve = (1.0 - _BlueprintIntensity) * 0.15;
                 finalColor = lerp(finalColor, sceneColor, scenePreserve);
 
-                return half4(saturate(finalColor), 1.0);
+                //return half4(saturate(finalColor), 1.0);
+
+                float3 noiseCol = SAMPLE_TEXTURE2D_X(_Noise, sampler_Noise, uv).rgb;
+                float noiseRate = noiseCol.r;
+                half noiseEdge = 1.0 - _StepLim;
+
+                // 过渡宽度（你可以调这个，0.01~0.1 之间比较常用）
+                half smoothWidth = 0.05;
+
+                // smoothstep 做平滑
+                half t = smoothstep(noiseEdge - smoothWidth, noiseEdge + smoothWidth, noiseRate);
+
+                // lerp 混合两个结果
+                half3 col = lerp(color, finalColor, t);
+
+                return half4(col, 1.0);
             }
             ENDHLSL
         }

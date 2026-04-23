@@ -30,27 +30,27 @@ Material:
     - _FilmicContrast: 1.64
     - _GlobalLift: 0
     - _GlobalSaturation: 1
-    - _GlobalTintStrength: 0
+    - _GlobalTintStrength: 0.35
     - _HighlightCompression: 0.2
-    - _HighlightLift: 0.1
+    - _HighlightLift: 0.05
     - _HighlightSaturation: 1.4
-    - _HighlightStart: 0.7
+    - _HighlightStart: 0.75
     - _HighlightTintStrength: 0.5
-    - _MidtoneLift: 0.05
+    - _MidtoneLift: -0.02
     - _MidtoneSaturation: 1
-    - _MidtoneTintStrength: 0.1
+    - _MidtoneTintStrength: 0.2
     - _PostExposure: 0
     - _RangeSoftness: 0.2
     - _Saturation: 1
     - _ShadowEnd: 0.35
-    - _ShadowLift: -0.1
+    - _ShadowLift: -0.05
     - _ShadowLiftFilm: 0.04
-    - _ShadowSaturation: 0.7
-    - _ShadowTintStrength: 1
+    - _ShadowSaturation: 0.8
+    - _ShadowTintStrength: 0.4
     - _WhitePoint: 1
     m_Colors:
-    - _GlobalTint: {r: 1, g: 0.81446534, b: 0.81446534, a: 1}
-    - _HighlightsTint: {r: 0.9308176, g: 0.8989276, b: 0.8634943, a: 1}
+    - _GlobalTint: {r: 0.8053281, g: 0.82155573, b: 0.9245283, a: 1}
+    - _HighlightsTint: {r: 0.9685534, g: 0.93823665, b: 0.86804307, a: 1}
     - _MidtonesTint: {r: 1, g: 0.7901974, b: 0.77672946, a: 1}
     - _ShadowsTint: {r: 0.10163448, g: 0.07733072, b: 0.28930807, a: 1}
   m_BuildTextureStacks: []

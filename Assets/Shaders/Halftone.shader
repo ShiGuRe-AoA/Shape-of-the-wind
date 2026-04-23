@@ -14,6 +14,7 @@ Shader "Custom/URP/Halftone"
         _DarkColor("Dark Color", Color) = (0.10, 0.22, 0.38, 1)
         _LightColor("Light Color", Color) = (0.93, 0.88, 0.82, 1)
 
+        [Header(Gradient)]
         _Noise("Noise Texture", 2D) = "white" {}
         _StepLim("Step Limit",Range(0,1)) = 0.5
     }
