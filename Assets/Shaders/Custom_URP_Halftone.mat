@@ -24,7 +24,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _Noise:
-        m_Texture: {fileID: 2800000, guid: f513e04c8ae022440a62298ac9080ca6, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3f5aa680de8cc1b4f95b810b6fe2eb3b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -34,7 +34,8 @@ Material:
     - _HalftoneScale: 4
     - _HalftoneSoftness: 0.05
     - _HalftoneStrength: 1
-    - _StepLim: 0.208
+    - _NoiseScale: 9.2
+    - _StepLim: 0
     - _Steps: 8
     m_Colors:
     - _DarkColor: {r: 0.06299188, g: 0.21860789, b: 0.408805, a: 1}

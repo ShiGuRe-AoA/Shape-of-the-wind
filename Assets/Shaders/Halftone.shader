@@ -16,6 +16,7 @@ Shader "Custom/URP/Halftone"
 
         [Header(Gradient)]
         _Noise("Noise Texture", 2D) = "white" {}
+        _NoiseScale("Noise Scale", Range(1, 100)) = 50
         _StepLim("Step Limit",Range(0,1)) = 0.5
     }
 
@@ -35,6 +36,7 @@ Shader "Custom/URP/Halftone"
             #pragma fragment FragHalftone
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
             TEXTURE2D_X(_BlitTexture);
             SAMPLER(sampler_BlitTexture);
@@ -51,6 +53,8 @@ Shader "Custom/URP/Halftone"
 
             float4 _DarkColor;
             float4 _LightColor;
+
+            float _NoiseScale;
 
             struct Attributes
             {
@@ -127,6 +131,25 @@ Shader "Custom/URP/Halftone"
                 return float2(u, v);
             }
 
+            float3 GetWorldPos(float2 uv, float rawDepth)
+            {
+                float2 ndcXY = uv * 2.0 - 1.0;
+
+                #if UNITY_UV_STARTS_AT_TOP
+                ndcXY.y = -ndcXY.y;
+                #endif
+
+                #if UNITY_REVERSED_Z
+                    float ndcZ = rawDepth;
+                #else
+                    float ndcZ = lerp(UNITY_NEAR_CLIP_VALUE, 1.0, rawDepth);
+                #endif
+
+                float4 clipPos = float4(ndcXY, ndcZ, 1.0);
+                float4 worldPos = mul(UNITY_MATRIX_I_VP, clipPos);
+                return worldPos.xyz / worldPos.w;
+            }
+
             half4 FragHalftone(Varyings input) : SV_Target
             {
                 //============================================ 直接半色调点
@@ -164,14 +187,21 @@ Shader "Custom/URP/Halftone"
                 //float noiseRate = noiseCol.r;
                 //===========
                 //===========
-                float3 dirWS = GetViewDirWS(input.uv);
-                float2 noiseUV = DirToLatLongUV(dirWS);
+                // float3 dirWS = GetViewDirWS(input.uv);
+                // float2 noiseUV = DirToLatLongUV(dirWS);
 
-                // todo: Transform / Scale
-                //noiseUV.x = frac(noiseUV.x * _NoiseTilingX + _NoiseOffsetX);
-                //noiseUV.y = saturate(noiseUV.y * _NoiseTilingY + _NoiseOffsetY);
+                // // todo: Transform / Scale
+                // //noiseUV.x = frac(noiseUV.x * _NoiseTilingX + _NoiseOffsetX);
+                // //noiseUV.y = saturate(noiseUV.y * _NoiseTilingY + _NoiseOffsetY);
                 
-                float noiseRate = SAMPLE_TEXTURE2D_X(_Noise,sampler_Noise,noiseUV).r;
+                // float noiseRate = SAMPLE_TEXTURE2D_X(_Noise,sampler_Noise,noiseUV).r;
+                //===========
+                //===========
+                float depth = SampleSceneDepth(input.uv);
+                float3 worldPos = GetWorldPos(input.uv, depth);
+                float2 noiseUV = worldPos.xz / _NoiseScale;
+
+                float noiseRate = SAMPLE_TEXTURE2D_X(_Noise, sampler_Noise, noiseUV).r;
                 //===========
 
                 half edge = 1.0 - _StepLim;
