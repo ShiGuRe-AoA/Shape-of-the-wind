@@ -31,10 +31,10 @@ Material:
     m_Floats:
     - _BlueprintIntensity: 1
     - _DepthEdgeThreshold: 0.15
-    - _DepthEdgeWeight: 0.3
+    - _DepthEdgeWeight: 0.7
     - _EdgeMaxRadius: 0.641
     - _EdgeMinRadius: 0.48
-    - _EdgeScale: 0.78
+    - _EdgeScale: 1.5
     - _HatchDensity: 6
     - _HatchLineWidth: 0.35
     - _HatchShadowSoftness: 0.2
@@ -48,11 +48,11 @@ Material:
     - _HighlightStrength: 0.2
     - _HighlightThreshold: 0.85
     - _JitterSpeed: 1
-    - _JitterStrength: 0.0015
+    - _JitterStrength: 0
     - _LightEdgeThreshold: 0.4
     - _LightEdgeWeight: 1
-    - _NormalEdgeThreshold: 0.4
-    - _NormalEdgeWeight: 0.5
+    - _NormalEdgeThreshold: 0.308
+    - _NormalEdgeWeight: 0.6
     - _StepLim: 1
     m_Colors:
     - _BlueprintBaseColor: {r: 0.410585, g: 0.46119252, b: 0.754717, a: 1}

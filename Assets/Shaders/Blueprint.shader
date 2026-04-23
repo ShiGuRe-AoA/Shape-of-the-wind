@@ -531,7 +531,7 @@ Shader "Custom/PostProcess/Blueprint"
                 float illumEdge = lightEdge * lightWeight;
 
                 float edge = saturate(
-                    (outerEdge * _DepthEdgeWeight + innerEdge * _NormalEdgeWeight + illumEdge * _LightEdgeWeight)
+                    pow((outerEdge * _DepthEdgeWeight + innerEdge * _NormalEdgeWeight + illumEdge * _LightEdgeWeight), 2)
                     * _EdgeScale
                     * edgeWeight
                 );
