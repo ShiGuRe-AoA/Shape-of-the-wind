@@ -30,11 +30,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _DotSizeMax: 1
-    - _DotSizeMin: 0.118
+    - _DotSizeMin: 0.1
     - _HalftoneScale: 4
-    - _HalftoneSoftness: 0.06
+    - _HalftoneSoftness: 0.05
     - _HalftoneStrength: 1
-    - _StepLim: 1
+    - _StepLim: 0.208
     - _Steps: 8
     m_Colors:
     - _DarkColor: {r: 0.06299188, g: 0.21860789, b: 0.408805, a: 1}

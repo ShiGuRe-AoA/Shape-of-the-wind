@@ -48,7 +48,7 @@ Material:
     - _HighlightStrength: 0.2
     - _HighlightThreshold: 0.85
     - _JitterSpeed: 1
-    - _JitterStrength: 0.001
+    - _JitterStrength: 0.0015
     - _LightEdgeThreshold: 0.4
     - _LightEdgeWeight: 1
     - _NormalEdgeThreshold: 0.4

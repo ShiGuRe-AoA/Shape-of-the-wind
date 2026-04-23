@@ -102,6 +102,31 @@ Shader "Custom/URP/Halftone"
                 );
             }
 
+            // 屏幕空间重建世界方向 - 当前像素在世界空间朝向哪
+            float3 GetViewDirWS(float2 uv)
+            {
+                float2 ndc = uv * 2.0 - 1.0;
+                float4 clipPos = float4(ndc, 1.0, 1.0);
+
+                float4 viewPos = mul(unity_CameraInvProjection, clipPos);
+                viewPos /= viewPos.w;
+
+                float3 viewDirVS = normalize(viewPos.xyz);
+                float3 viewDirWS = normalize(mul((float3x3)unity_CameraToWorld, viewDirVS));
+                return viewDirWS;
+            }
+
+            // 方向转到球面uv
+            float2 DirToLatLongUV(float3 dir)
+            {
+                dir = normalize(dir);
+
+                float u = atan2(dir.x, dir.z) / (2.0 * PI) + 0.5;
+                float v = asin(dir.y) / PI + 0.5;
+
+                return float2(u, v);
+            }
+
             half4 FragHalftone(Varyings input) : SV_Target
             {
                 //============================================ 直接半色调点
@@ -134,8 +159,21 @@ Shader "Custom/URP/Halftone"
 
                 //return half4(finalColor, 1.0);
 
-                float3 noiseCol = SAMPLE_TEXTURE2D_X(_Noise, sampler_Noise, input.uv).rgb;
-                float noiseRate = noiseCol.r;
+                //===========
+                //float3 noiseCol = SAMPLE_TEXTURE2D_X(_Noise, sampler_Noise, input.uv).rgb;
+                //float noiseRate = noiseCol.r;
+                //===========
+                //===========
+                float3 dirWS = GetViewDirWS(input.uv);
+                float2 noiseUV = DirToLatLongUV(dirWS);
+
+                // todo: Transform / Scale
+                //noiseUV.x = frac(noiseUV.x * _NoiseTilingX + _NoiseOffsetX);
+                //noiseUV.y = saturate(noiseUV.y * _NoiseTilingY + _NoiseOffsetY);
+                
+                float noiseRate = SAMPLE_TEXTURE2D_X(_Noise,sampler_Noise,noiseUV).r;
+                //===========
+
                 half edge = 1.0 - _StepLim;
 
                 // 过渡宽度（你可以调这个，0.01~0.1 之间比较常用）
