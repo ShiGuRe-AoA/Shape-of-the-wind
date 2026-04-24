@@ -30,8 +30,9 @@ Material:
     m_Ints: []
     m_Floats:
     - _BlueprintIntensity: 1
-    - _DepthEdgeThreshold: 0.15
-    - _DepthEdgeWeight: 0.7
+    - _DepthEdgeThreshold: 0.2
+    - _DepthEdgeWeight: 0.5
+    - _EdgeFadeStrength: 0.016
     - _EdgeMaxRadius: 0.641
     - _EdgeMinRadius: 0.48
     - _EdgeScale: 1.5
@@ -39,7 +40,7 @@ Material:
     - _HatchLineWidth: 0.35
     - _HatchShadowSoftness: 0.2
     - _HatchShadowStart: 0.25
-    - _HatchStrength: 0.547
+    - _HatchStrength: 0.978
     - _HatchWidth: 0.25
     - _HighlightAngle: 2.11
     - _HighlightLineDensity: 5

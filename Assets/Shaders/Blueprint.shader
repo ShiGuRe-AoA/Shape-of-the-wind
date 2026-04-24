@@ -8,6 +8,7 @@ Shader "Custom/PostProcess/Blueprint"
 
         [Header(Edge)]
         _EdgeScale("Edge Scale", Range(0,5)) = 1.5
+        _EdgeFadeStrength("Edge Fade Strength", Range(0, 0.1)) = 0.05
         _DepthEdgeWeight("Depth Edge Weight", Range(0, 1)) = 0.5
         _DepthEdgeThreshold("Depth Edge Threshold", Range(0.0001,1)) = 0.002
         _NormalEdgeWeight("Normal Edge Weight",Range(0, 1)) = 0.5
@@ -79,6 +80,7 @@ Shader "Custom/PostProcess/Blueprint"
             float _BlueprintIntensity;
 
             float _EdgeScale;
+            float _EdgeFadeStrength;
 
             float _DepthEdgeWeight;
             float _DepthEdgeThreshold;
@@ -192,7 +194,7 @@ Shader "Custom/PostProcess/Blueprint"
 
                 // 这个系数后面你要按场景调
                 // 值越大，fade增长越快
-                return saturate(linearDepth * 0.06);
+                return saturate(linearDepth * _EdgeFadeStrength);
             }
 
             // ===== 深度边缘检测 =====
@@ -496,10 +498,10 @@ Shader "Custom/PostProcess/Blueprint"
                 //====================
                 float edgeFade = GetEdgeDistanceFade(uv);
 
-                float radiusScale = lerp(1, 0.5, edgeFade);
+                float radiusScale = lerp(1, 0.6, edgeFade);
 
-                float depthThresholdScale  = lerp(1.0, 1.5, edgeFade);
-                float normalThresholdScale = lerp(1.0, 1.5, edgeFade);
+                float depthThresholdScale  = lerp(1.0, 1.2, edgeFade);
+                float normalThresholdScale = lerp(1.0, 1.2, edgeFade);
 
                 float depthEdge  = CalcDepthEdge(jitteredUV, texelSize, radiusScale, depthThresholdScale);
                 float normalEdge = CalcNormalEdge(jitteredUV, texelSize, radiusScale, normalThresholdScale);
@@ -517,14 +519,14 @@ Shader "Custom/PostProcess/Blueprint"
 
 
                 // 远处减少深度边缘
-                float depthWeight = lerp(1.0, 0.35, edgeFade);
+                float depthWeight = lerp(1.0, 0.15, edgeFade);
                 // 远处减少法线边缘，避免内部线糊成粗块
-                float normalWeight = lerp(1.0, 0.35, edgeFade);
+                float normalWeight = lerp(1.0, 0.6, edgeFade);
 
                 // 远处也略微减少光照边缘，避免阴影边界膨胀
                 float lightWeight = lerp(1.0, 0.75, edgeFade);
 
-                float edgeWeight = lerp(1.0, 0.85, edgeFade);
+                float edgeWeight = lerp(1.0, 0.2, edgeFade);
 
                 float outerEdge = depthEdge * depthWeight;
                 float innerEdge = normalEdge * normalWeight;
@@ -549,7 +551,7 @@ Shader "Custom/PostProcess/Blueprint"
                     luminance
                 );
 
-                hatch *= _HatchStrength;
+                hatch *= _HatchStrength * edgeWeight;
                 //hatch *= shadowMask * _HatchStrength;
 
                 float highlightMask = smoothstep(
@@ -559,7 +561,7 @@ Shader "Custom/PostProcess/Blueprint"
                 );
 
                 float highlightLines = HighlightLinePattern(jitteredUV);
-                highlightLines *= highlightMask * _HighlightStrength;
+                highlightLines *= highlightMask * _HighlightStrength * edgeWeight;
 
                 float3 blueprintColor = _BlueprintBaseColor.rgb;
                 float3 finalColor = blueprintColor;
