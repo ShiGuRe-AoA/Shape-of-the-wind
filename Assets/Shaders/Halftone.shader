@@ -7,7 +7,7 @@ Shader "Custom/URP/Halftone"
         _HalftoneSoftness("Halftone Softness", Range(0, 0.5)) = 0.03
 
         [Header(Tone)]
-        _DotSizeMin("Dot Size Min", Range(0.01, 0.5)) = 0.05
+        _DotSizeMin("Dot Size Min", Range(0, 0.5)) = 0.05
         _DotSizeMax("Dot Size Max", Range(0.3, 1)) = 0.45
 
         [Header(Color)]
@@ -155,8 +155,11 @@ Shader "Custom/URP/Halftone"
                 //============================================ 直接半色调点
                 float3 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, input.uv).rgb;
 
+                // Luma 的 L 作为明度
+                float L = dot(color, float3(0.2627, 0.6780, 0.0593));
+
                 // 用 OKLAB 的 L 作为明度
-                float L = saturate(RGB2OKLAB(color).x);
+                //float L = saturate(RGB2OKLAB(color).x);
 
                 // 屏幕空间 halftone cell
                 float2 screenUV = input.uv * _ScreenParams.xy / max(_HalftoneScale, 1.0);

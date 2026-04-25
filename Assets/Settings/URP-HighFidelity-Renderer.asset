@@ -15,14 +15,18 @@ MonoBehaviour:
   m_Active: 1
   settings:
     materials:
+    - material: {fileID: 2100000, guid: f4199275b1eadf34dbeb5b394a2a45c9, type: 2}
+      available: 1
     - material: {fileID: 2100000, guid: db90b4b179473ce47be70663dbf5cf57, type: 2}
-      available: 1
+      available: 0
     - material: {fileID: 2100000, guid: 9c60dffc2b09b324ebe3b535b7996cb5, type: 2}
-      available: 1
+      available: 0
     - material: {fileID: 2100000, guid: ea9a01909ee9ea341b18173b8964a755, type: 2}
-      available: 1
+      available: 0
     - material: {fileID: 2100000, guid: 01342dcf96ef6e94e8bc532dae6f64fb, type: 2}
-      available: 1
+      available: 0
+    - material: {fileID: 2100000, guid: 4c4d6d7e8fa484e49b04742824121df3, type: 2}
+      available: 0
     passEvent: 600
 --- !u!114 &-1878332245247344467
 MonoBehaviour:

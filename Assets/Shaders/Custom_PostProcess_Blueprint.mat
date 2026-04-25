@@ -38,9 +38,9 @@ Material:
     - _EdgeScale: 1.5
     - _HatchDensity: 6
     - _HatchLineWidth: 0.35
-    - _HatchShadowSoftness: 0.2
+    - _HatchShadowSoftness: 0.4
     - _HatchShadowStart: 0.25
-    - _HatchStrength: 0.978
+    - _HatchStrength: 0.7
     - _HatchWidth: 0.25
     - _HighlightAngle: 2.11
     - _HighlightLineDensity: 5

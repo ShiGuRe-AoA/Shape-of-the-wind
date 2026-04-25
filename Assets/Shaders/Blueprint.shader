@@ -294,8 +294,14 @@ Shader "Custom/PostProcess/Blueprint"
             // ===== 亮度检测 =====
             float CalcLuminance(float3 color)
             {
-                //return dot(color, float3(0.299, 0.587, 0.114);
-                return RGB2OKLAB(color).x;
+                // Rec.601 老电视
+                //return dot(color, float3(0.299, 0.587, 0.114));
+                // Rec.709 HDTV
+                //return dot(color, float3(0.2126, 0.7152, 0.0722));
+                // Rec.2020 HDR广色域
+                return dot(color, float3(0.2627, 0.6780, 0.0593));
+                // OKLAB
+                //return RGB2OKLAB(color).x;
             }
 
             // ===== 暗部排线 =====
