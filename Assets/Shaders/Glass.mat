@@ -22,14 +22,22 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _StainedGlassTex:
+        m_Texture: {fileID: 2800000, guid: 16696e6ada7f87a4c85eb7beef355e17, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AngleOffset: 5
-    - _CellDensity: 40
-    - _EffectStrength: 1
-    - _LineSoftness: 0.02
-    - _LineWidth: 0.02
+    - _AngleOffset: 7
+    - _CellDensity: 60
+    - _DriftAmount: 1.5
+    - _DriftSpeed: 0.5
+    - _EffectStrength: 0.8
+    - _LineSoftness: 0.2
+    - _LineWidth: 0
+    - _StainedGlassScale: 10
+    - _StainedGlassStrength: 0.25
     m_Colors:
-    - _LineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _LineColor: {r: 0.106918216, g: 0.106918216, b: 0.106918216, a: 0.9490196}
   m_BuildTextureStacks: []

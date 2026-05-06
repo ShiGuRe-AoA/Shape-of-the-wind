@@ -6,6 +6,11 @@ Shader "Custom/URP/PostProcess/Glass"
         _CellDensity ("Cell Density", Range(1, 200)) = 40
         _AngleOffset ("Angle Offset", Range(0, 20)) = 5
 
+        [Header(Stained Glass)]
+        _StainedGlassTex ("Stained Glass Texture", 2D) = "white" {}
+        _StainedGlassStrength ("Stained Glass Strength", Range(0, 1)) = 0.5
+        _StainedGlassScale ("Stained Glass Scale", Range(0.1, 10)) = 1
+
         [Header(Edge)]
         _LineWidth ("Line Width", Range(0, 0.2)) = 0.02
         _LineSoftness ("Line Softness", Range(0.0001, 0.2)) = 0.02
@@ -13,6 +18,10 @@ Shader "Custom/URP/PostProcess/Glass"
 
         [Header(Mix)]
         _EffectStrength ("Effect Strength", Range(0,1)) = 1
+
+        [Header(Animation)]
+        _DriftSpeed ("Drift Speed", Range(0, 2)) = 0.2
+        _DriftAmount ("Drift Amount", Range(0, 2)) = 0.5
     }
 
     SubShader
@@ -45,6 +54,9 @@ Shader "Custom/URP/PostProcess/Glass"
             TEXTURE2D_X(_BlitTexture);
             SAMPLER(sampler_BlitTexture);
 
+            TEXTURE2D(_StainedGlassTex);
+            SAMPLER(sampler_StainedGlassTex);
+    
             //================================================
             // Parameters
             //================================================
@@ -52,11 +64,18 @@ Shader "Custom/URP/PostProcess/Glass"
             float _CellDensity;
             float _AngleOffset;
 
+            float4 _StainedGlassTex_ST;
+            float _StainedGlassStrength;
+            float _StainedGlassScale;
+
             float _LineWidth;
             float _LineSoftness;
             float4 _LineColor;
 
             float _EffectStrength;
+
+            float _DriftSpeed;
+            float _DriftAmount;
 
             //================================================
             // Vertex
@@ -95,6 +114,55 @@ Shader "Custom/URP/PostProcess/Glass"
                 #endif
 
                 return output;
+            }
+
+            //================================================
+            // OKLAB
+            //================================================
+
+            float cbrt_safe(float x)
+            {
+                return sign(x) * pow(abs(x), 1.0 / 3.0);
+            }
+
+            float3 RGB2OKLAB(float3 c)
+            {
+                float l = 0.41222147*c.r + 0.53633254*c.g + 0.05144599*c.b;
+                float m = 0.21190350*c.r + 0.68069955*c.g + 0.10739696*c.b;
+                float s = 0.08830246*c.r + 0.28171884*c.g + 0.62997870*c.b;
+
+                float3 lms = float3(
+                    cbrt_safe(l),
+                    cbrt_safe(m),
+                    cbrt_safe(s)
+                );
+
+                return float3(
+                    0.21045426*lms.x + 0.79361778*lms.y - 0.00407205*lms.z,
+                    1.97799850*lms.x - 2.42859221*lms.y + 0.45059371*lms.z,
+                    0.02590404*lms.x + 0.78277177*lms.y - 0.80867577*lms.z
+                );
+            }
+
+            float3 OKLAB2RGB(float3 lab)
+            {
+                float L = lab.x;
+                float a = lab.y;
+                float b = lab.z;
+
+                float l_ = L + 0.3963377774*a + 0.2158037573*b;
+                float m_ = L - 0.1055613458*a - 0.0638541728*b;
+                float s_ = L - 0.0894841775*a - 1.2914855480*b;
+
+                float l = l_*l_*l_;
+                float m = m_*m_*m_;
+                float s = s_*s_*s_;
+
+                float3 rgb;
+                rgb.r =  4.0767416621*l - 3.3077115913*m + 0.2309699292*s;
+                rgb.g = -1.2684380046*l + 2.6097574011*m - 0.3413193965*s;
+                rgb.b = -0.0041960863*l - 0.7034186147*m + 1.7076147010*s;
+                return rgb;
             }
 
             //================================================
@@ -317,6 +385,10 @@ Shader "Custom/URP/PostProcess/Glass"
                 float2 voronoiUVMax =
                     float2(aspect, 1.0);
 
+                float animatedAngleOffset =
+                    _AngleOffset +
+                    sin(_Time.y * _DriftSpeed) * _DriftAmount;
+
                 //----------------------------------------
                 // voronoi
                 //----------------------------------------
@@ -335,7 +407,8 @@ Shader "Custom/URP/PostProcess/Glass"
                     voronoiUV,
                     voronoiUVMax,
 
-                    _AngleOffset,
+                    //_AngleOffset,
+                    animatedAngleOffset,
                     _CellDensity,
 
                     f1,
@@ -387,6 +460,24 @@ Shader "Custom/URP/PostProcess/Glass"
                         sampler_BlitTexture,
                         controlPointUV1
                     );
+
+                float2 stainedUV = controlPointUV1 * _StainedGlassScale;
+                half3 stainedCol = SAMPLE_TEXTURE2D(
+                    _StainedGlassTex,
+                    sampler_StainedGlassTex,
+                    stainedUV
+                ).rgb;
+
+                // 保留屏幕明暗，只染色
+                //half luminance = dot(mosaicCol.rgb, half3(0.299, 0.587, 0.114));
+                half luminance = RGB2OKLAB(mosaicCol.rgb).r;
+                half3 stainedGlassCol = stainedCol * luminance * 1.5;
+
+                mosaicCol.rgb = lerp(
+                    mosaicCol.rgb,
+                    stainedGlassCol,
+                    _StainedGlassStrength
+                );
 
                 //----------------------------------------
                 // edge mask

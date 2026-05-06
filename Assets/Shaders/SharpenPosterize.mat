@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Custom_PostProcess_OKLCH
-  m_Shader: {fileID: 4800000, guid: d49fb706a1efd094a81faf40afdeaacd, type: 3}
+  m_Name: SharpenPosterize
+  m_Shader: {fileID: 4800000, guid: 6d22992eb80300c4e83890efa4660c25, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -22,15 +22,21 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _BlitTexture:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _ChromaScale: 1
-    - _HueShift: 0
-    - _LightnessOffset: 0
+    - _AAStrength: 5
+    - _ColorWeight: 0.15
+    - _DitherStrength: 0
+    - _EdgeWidth: 0
+    - _EnablePosterize: 1
+    - _EnableSharpen: 1
+    - _HalftoneScale: 171
+    - _HalftoneSoftness: 0.061
+    - _HalftoneStrength: 1
+    - _LightWeight: 1
+    - _PosterizeSteps: 24.680086
+    - _SharpenStrength: 0
+    - _SmoothAreaReduce: 0.07
     m_Colors: []
   m_BuildTextureStacks: []

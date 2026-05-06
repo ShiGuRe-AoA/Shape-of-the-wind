@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Custom_URP_ColorAdjustment
+  m_Name: ColorAdjustment
   m_Shader: {fileID: 4800000, guid: d1f51440d6c41eb4a955860aad450767, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

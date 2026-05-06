@@ -16,7 +16,7 @@ MonoBehaviour:
   settings:
     materials:
     - material: {fileID: 2100000, guid: f4199275b1eadf34dbeb5b394a2a45c9, type: 2}
-      available: 1
+      available: 0
     - material: {fileID: 2100000, guid: db90b4b179473ce47be70663dbf5cf57, type: 2}
       available: 0
     - material: {fileID: 2100000, guid: 9c60dffc2b09b324ebe3b535b7996cb5, type: 2}
@@ -25,6 +25,8 @@ MonoBehaviour:
       available: 0
     - material: {fileID: 2100000, guid: 01342dcf96ef6e94e8bc532dae6f64fb, type: 2}
       available: 0
+    - material: {fileID: 2100000, guid: 5320f66d08bff454692c2cd2aee8bdaf, type: 2}
+      available: 1
     passEvent: 600
 --- !u!114 &-1878332245247344467
 MonoBehaviour:

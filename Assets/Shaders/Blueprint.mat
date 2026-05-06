@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Custom_PostProcess_Blueprint
+  m_Name: Blueprint
   m_Shader: {fileID: 4800000, guid: 61a71714d7736484a8590af3e82997db, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

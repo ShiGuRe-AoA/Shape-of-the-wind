@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Hidden_Custom_Constructivism
+  m_Name: Constructivism
   m_Shader: {fileID: 4800000, guid: 57875cd11de1ce84db4e6cbd3b644592, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
