@@ -29,15 +29,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AngleOffset: 7
-    - _CellDensity: 60
-    - _DriftAmount: 1.5
-    - _DriftSpeed: 0.5
-    - _EffectStrength: 0.8
-    - _LineSoftness: 0.2
+    - _AngleOffset: 8
+    - _CellDensity: 120
+    - _DepthEdgeSoftness: 0.00001
+    - _DepthEdgeStrength: 1
+    - _DepthEdgeThreshold: 0.001
+    - _DriftAmount: 2
+    - _DriftSpeed: 2
+    - _EffectStrength: 1
+    - _LineSoftness: 0.0001
     - _LineWidth: 0
     - _StainedGlassScale: 10
-    - _StainedGlassStrength: 0.25
+    - _StainedGlassStrength: 0
     m_Colors:
     - _LineColor: {r: 0.106918216, g: 0.106918216, b: 0.106918216, a: 0.9490196}
   m_BuildTextureStacks: []

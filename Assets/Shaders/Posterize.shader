@@ -1,14 +1,10 @@
-Shader "Custom/URP/SharpenPosterize"
+Shader "Custom/URP/Posterize"
 {
     Properties
     {
-        [Header(Sharpen and Posterize)]
-        _SharpenStrength("Sharpen Strength", Range(0, 0.5)) = 0.2
         _PosterizeSteps("Posterize Steps", Range(8, 64)) = 32
         _LightWeight("Posterize Light Weight", Range(0, 1)) = 0.5
         _ColorWeight("Posterize Color Weight", Range(0, 1)) = 0.2
-        _EnableSharpen("Enable Sharpen", Float) = 1
-        _EnablePosterize("Enable Posterize", Float) = 1
     }
 
     SubShader
@@ -31,12 +27,9 @@ Shader "Custom/URP/SharpenPosterize"
             TEXTURE2D_X(_BlitTexture);
             SAMPLER(sampler_BlitTexture);
 
-            float _SharpenStrength;
             float _PosterizeSteps;
             float _LightWeight;
             float _ColorWeight;
-            float _EnableSharpen;
-            float _EnablePosterize;
 
             struct Attributes
             {
@@ -62,21 +55,6 @@ Shader "Custom/URP/SharpenPosterize"
                 #endif
 
                 return output;
-            }
-
-            float3 ApplySharpen(float2 uv)
-            {
-                float2 texelSize = 1.0 / _ScreenParams.xy;
-
-                float3 center = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv).rgb;
-                float3 up     = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv + float2(0,  texelSize.y)).rgb;
-                float3 down   = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv + float2(0, -texelSize.y)).rgb;
-                float3 left   = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv + float2(-texelSize.x, 0)).rgb;
-                float3 right  = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv + float2( texelSize.x, 0)).rgb;
-
-                float k = _SharpenStrength;
-                float3 result = center * (1.0 + 4.0 * k) - (up + down + left + right) * k;
-                return saturate(result);
             }
 
             float3 RGB2OKLAB(float3 c)
@@ -114,13 +92,6 @@ Shader "Custom/URP/SharpenPosterize"
             {
                 float steps = max(_PosterizeSteps, 2.0);
 
-                //============
-                // float luminance = dot(color, float3(0.299, 0.587, 0.114));
-                // float l = floor(luminance * steps) / steps;
-                // color *= (l / max(luminance, 1e-5));
-                // return saturate(color);
-                //============
-
                 //============ OKLAB 2 RGB
                 float3 originLab = RGB2OKLAB(color);
                 float3 lab = originLab;
@@ -142,15 +113,7 @@ Shader "Custom/URP/SharpenPosterize"
             {
                 float3 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, input.uv).rgb;
 
-                if (_EnableSharpen > 0.5)
-                {
-                    color = ApplySharpen(input.uv);
-                }
-
-                if (_EnablePosterize > 0.5)
-                {
-                    color = ApplyPosterize(color);
-                }
+                color = ApplyPosterize(color);
 
                 return half4(color, 1.0);
             }
