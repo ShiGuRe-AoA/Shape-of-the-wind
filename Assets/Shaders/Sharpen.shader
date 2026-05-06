@@ -2,6 +2,7 @@ Shader "Custom/URP/Sharpen"
 {
     Properties
     {
+        _SharpenRadius ("Sharpen Radius", Range(0.5, 2.5)) = 1
         _SharpenStrength("Sharpen Strength", Range(0, 2)) = 0.2
     }
 
@@ -25,6 +26,7 @@ Shader "Custom/URP/Sharpen"
             TEXTURE2D_X(_BlitTexture);
             SAMPLER(sampler_BlitTexture);
 
+            float _SharpenRadius;
             float _SharpenStrength;
 
             struct Attributes
@@ -55,7 +57,9 @@ Shader "Custom/URP/Sharpen"
 
             float3 ApplySharpen(float2 uv)
             {
-                float2 texelSize = 1.0 / _ScreenParams.xy;
+                float2 texelSize =
+                    (1.0 / _ScreenParams.xy) *
+                    _SharpenRadius;
 
                 float3 center = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv).rgb;
                 float3 up     = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv + float2(0,  texelSize.y)).rgb;
