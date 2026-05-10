@@ -5,13 +5,13 @@ Shader "Custom/PostProcess/Constructivism"
         [Header(Base Tone)]
         _EffectIntensity("Effect Intensity", Range(0,1)) = 1
 
-        _PaperColor("Paper Color", Color) = (0.88, 0.80, 0.63, 1)
-        _CreamColor("Cream Color", Color) = (0.72, 0.63, 0.45, 1)
-        _WarmGrayColor("Warm Gray Color", Color) = (0.36, 0.34, 0.28, 1)
-        _InkBlackColor("Ink Black Color", Color) = (0.06, 0.055, 0.045, 1)
+        _PaperColor("Paper Color / Highlight", Color) = (0.92, 0.90, 0.84, 1)
+        _CreamColor("Cream Color / Mid", Color) = (0.85, 0.02, 0.02, 1)
+        _WarmGrayColor("Warm Gray Color / Dark Mid", Color) = (0.28, 0.00, 0.00, 1)
+        _InkBlackColor("Ink Black Color / Shadow", Color) = (0.02, 0.015, 0.01, 1)
 
-        _BlackThreshold("Black Threshold", Range(0,1)) = 0.20
-        _GrayThreshold("Gray Threshold", Range(0,1)) = 0.45
+        _BlackThreshold("Black Threshold", Range(0,1)) = 0.22
+        _GrayThreshold("Gray Threshold", Range(0,1)) = 0.48
         _CreamThreshold("Cream Threshold", Range(0,1)) = 0.72
 
         [Header(Print Noise)]
@@ -20,21 +20,20 @@ Shader "Custom/PostProcess/Constructivism"
         _NoiseThresholdJitter("Noise Threshold Jitter", Range(0,0.2)) = 0.08
         _NoiseStrength("Noise Strength", Range(0,1)) = 0.16
 
-        [Header(Hatch)]
-        _HatchDensity("Hatch Density", Range(1,1000)) = 180
-        _HatchStrength("Hatch Strength", Range(0,1)) = 0.28
-        _HatchWidth("Hatch Width", Range(0.01,0.49)) = 0.12
-        _HatchShadowStart("Hatch Shadow Start", Range(0,1)) = 0.48
-        _HatchShadowSoftness("Hatch Shadow Softness", Range(0.001,0.5)) = 0.16
+        [Header(Edge Lines)]
+        _LineColor("Line Color", Color) = (0.02, 0.015, 0.01, 1)
+        _LineIntensity("Line Intensity", Range(0,1)) = 1
+        _LineThickness("Line Thickness", Range(0.5,5)) = 1.5
 
-        [Header(Edge Roughness)]
-        _EdgeRoughness("Edge Roughness", Range(0,1)) = 0.35
+        _DepthThreshold("Depth Threshold", Range(0.0001,0.1)) = 0.015
+        _NormalThreshold("Normal Threshold", Range(0.01,1)) = 0.25
+        _ColorThreshold("Color Threshold", Range(0.001,0.5)) = 0.08
 
-        [Header(Optional Geometry)]
-        _GeoStrength("Geometry Strength", Range(0,1)) = 0
-        _RedColor("Red Color", Color) = (0.65, 0.06, 0.035, 1)
-        _RedBlockOffset("Red Block Offset", Range(-1,1)) = -0.22
-        _RedBlockSoftness("Red Block Softness", Range(0.001,0.2)) = 0.015
+        _LineFadeStart("Line Fade Start", Float) = 5
+        _LineFadeEnd("Line Fade End", Float) = 100
+
+        [Header(Edge Debug)]
+        [Toggle(_DEBUG_EDGE)] _DebugEdge("Debug Edge", Float) = 0
     }
 
     SubShader
@@ -59,8 +58,12 @@ Shader "Custom/PostProcess/Constructivism"
             #pragma vertex Vert
             #pragma fragment Frag
 
+            #pragma multi_compile_local _ _DEBUG_EDGE
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareNormalsTexture.hlsl"
 
             TEXTURE2D_X(_Noise);
             SAMPLER(sampler_Noise);
@@ -82,18 +85,16 @@ Shader "Custom/PostProcess/Constructivism"
             float _NoiseThresholdJitter;
             float _NoiseStrength;
 
-            float _HatchDensity;
-            float _HatchStrength;
-            float _HatchWidth;
-            float _HatchShadowStart;
-            float _HatchShadowSoftness;
+            float4 _LineColor;
+            float _LineIntensity;
+            float _LineThickness;
 
-            float _EdgeRoughness;
+            float _DepthThreshold;
+            float _NormalThreshold;
+            float _ColorThreshold;
 
-            float _GeoStrength;
-            float4 _RedColor;
-            float _RedBlockOffset;
-            float _RedBlockSoftness;
+            float _LineFadeStart;
+            float _LineFadeEnd;
 
             float cbrt_safe(float x)
             {
@@ -102,9 +103,9 @@ Shader "Custom/PostProcess/Constructivism"
 
             float3 RGB2OKLAB(float3 c)
             {
-                float l = 0.41222147*c.r + 0.53633254*c.g + 0.05144599*c.b;
-                float m = 0.21190350*c.r + 0.68069955*c.g + 0.10739696*c.b;
-                float s = 0.08830246*c.r + 0.28171884*c.g + 0.62997870*c.b;
+                float l = 0.41222147 * c.r + 0.53633254 * c.g + 0.05144599 * c.b;
+                float m = 0.21190350 * c.r + 0.68069955 * c.g + 0.10739696 * c.b;
+                float s = 0.08830246 * c.r + 0.28171884 * c.g + 0.62997870 * c.b;
 
                 float3 lms = float3(
                     cbrt_safe(l),
@@ -113,9 +114,9 @@ Shader "Custom/PostProcess/Constructivism"
                 );
 
                 return float3(
-                    0.21045426*lms.x + 0.79361778*lms.y - 0.00407205*lms.z,
-                    1.97799850*lms.x - 2.42859221*lms.y + 0.45059371*lms.z,
-                    0.02590404*lms.x + 0.78277177*lms.y - 0.80867577*lms.z
+                    0.21045426 * lms.x + 0.79361778 * lms.y - 0.00407205 * lms.z,
+                    1.97799850 * lms.x - 2.42859221 * lms.y + 0.45059371 * lms.z,
+                    0.02590404 * lms.x + 0.78277177 * lms.y - 0.80867577 * lms.z
                 );
             }
 
@@ -125,31 +126,28 @@ Shader "Custom/PostProcess/Constructivism"
                 float a = lab.y;
                 float b = lab.z;
 
-                float l_ = L + 0.3963377774*a + 0.2158037573*b;
-                float m_ = L - 0.1055613458*a - 0.0638541728*b;
-                float s_ = L - 0.0894841775*a - 1.2914855480*b;
+                float l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+                float m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+                float s_ = L - 0.0894841775 * a - 1.2914855480 * b;
 
-                float l = l_*l_*l_;
-                float m = m_*m_*m_;
-                float s = s_*s_*s_;
+                float l = l_ * l_ * l_;
+                float m = m_ * m_ * m_;
+                float s = s_ * s_ * s_;
 
                 float3 rgb;
-                rgb.r =  4.0767416621*l - 3.3077115913*m + 0.2309699292*s;
-                rgb.g = -1.2684380046*l + 2.6097574011*m - 0.3413193965*s;
-                rgb.b = -0.0041960863*l - 0.7034186147*m + 1.7076147010*s;
+                rgb.r =  4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+                rgb.g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+                rgb.b = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+
                 return rgb;
             }
 
-
             float CalcLuminance(float3 color)
             {
-                // Rec.601 老电视
-                //return dot(color, float3(0.299, 0.587, 0.114));
-                // Rec.709 HDTV
-                //return dot(color, float3(0.2126, 0.7152, 0.0722));
-                // Rec.2020 HDR广色域
+                // Rec.2020 HDR 广色域
                 return dot(color, float3(0.2627, 0.6780, 0.0593));
-                // OKLAB
+
+                // 也可以换成 OKLAB：
                 //return RGB2OKLAB(color).x;
             }
 
@@ -170,61 +168,91 @@ Shader "Custom/PostProcess/Constructivism"
                 return _PaperColor.rgb;
             }
 
-            float DiagonalMask(float2 uv, float2 dir, float offset, float softness)
+            float RobertsCrossDepth(float2 uv, float2 ts)
             {
-                float d = dot(uv - 0.5, normalize(dir)) + offset;
-                return smoothstep(-softness, softness, d);
+                float raw00 = SampleSceneDepth(uv);
+                float raw11 = SampleSceneDepth(uv + ts);
+                float raw10 = SampleSceneDepth(uv + float2(ts.x, 0));
+                float raw01 = SampleSceneDepth(uv + float2(0, ts.y));
+
+                float d00 = LinearEyeDepth(raw00, _ZBufferParams);
+                float d11 = LinearEyeDepth(raw11, _ZBufferParams);
+                float d10 = LinearEyeDepth(raw10, _ZBufferParams);
+                float d01 = LinearEyeDepth(raw01, _ZBufferParams);
+
+                float baseDepth = max(d00, 0.001);
+
+                float diff1 = abs(d11 - d00) / baseDepth;
+                float diff2 = abs(d10 - d01) / baseDepth;
+
+                return sqrt(diff1 * diff1 + diff2 * diff2);
             }
 
-            float HatchLinesAngle(float2 uv, float angle)
+            float RobertsCrossNormal(float2 uv, float2 ts)
             {
-                float s = sin(angle);
-                float c = cos(angle);
+                float3 n00 = SampleSceneNormals(uv);
+                float3 n11 = SampleSceneNormals(uv + ts);
+                float3 n10 = SampleSceneNormals(uv + float2(ts.x, 0));
+                float3 n01 = SampleSceneNormals(uv + float2(0, ts.y));
 
-                float2 p;
-                p.x = uv.x * c - uv.y * s;
-                p.y = uv.x * s + uv.y * c;
+                float3 g0 = n11 - n00;
+                float3 g1 = n10 - n01;
 
-                float v = frac(p.y);
-                return 1.0 - smoothstep(_HatchWidth, _HatchWidth + 0.03, v);
+                return sqrt(dot(g0, g0) + dot(g1, g1));
             }
 
-            float HatchPattern(float2 uv, float luminance)
+            float RobertsCrossLuma(float2 uv, float2 ts)
             {
-                float2 hatchUV = uv * _ScreenParams.xy;
+                float3 c00 = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb;
+                float3 c11 = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv + ts).rgb;
+                float3 c10 = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv + float2(ts.x, 0)).rgb;
+                float3 c01 = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv + float2(0, ts.y)).rgb;
 
-                float hatch1 = HatchLinesAngle(hatchUV / _HatchDensity, 0.52);
-                float hatch2 = HatchLinesAngle(hatchUV / (_HatchDensity / 1.25), -0.5);
+                float l00 = CalcLuminance(c00);
+                float l11 = CalcLuminance(c11);
+                float l10 = CalcLuminance(c10);
+                float l01 = CalcLuminance(c01);
 
-                float shadowMask = 1.0 - smoothstep(
-                    _HatchShadowStart,
-                    _HatchShadowStart + _HatchShadowSoftness,
-                    luminance
-                );
+                float d1 = l11 - l00;
+                float d2 = l10 - l01;
 
-                float darkMask = 1.0 - smoothstep(
-                    _HatchShadowStart - _HatchShadowSoftness,
-                    _HatchShadowStart + 0.5 * _HatchShadowSoftness,
-                    luminance
-                );
-
-                return saturate(hatch1 * shadowMask * 0.35 + hatch2 * darkMask * 0.65);
+                return sqrt(d1 * d1 + d2 * d2);
             }
 
-            float EdgeMask(float2 uv)
+            float GetLineFade(float sceneDepth)
             {
-                float2 texel = _BlitTexture_TexelSize.xy;
+                return saturate((_LineFadeEnd - sceneDepth) / max(_LineFadeEnd - _LineFadeStart, 0.001));
+            }
 
-                float3 c  = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb;
-                float3 cx = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv + float2(texel.x, 0)).rgb;
-                float3 cy = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv + float2(0, texel.y)).rgb;
+            float EdgeMask(float2 uv, out float sceneDepth)
+            {
+                float rawDepth = SampleSceneDepth(uv);
+                sceneDepth = LinearEyeDepth(rawDepth, _ZBufferParams);
 
-                float l  = CalcLuminance(c);
-                float lx = CalcLuminance(cx);
-                float ly = CalcLuminance(cy);
+                #if defined(UNITY_REVERSED_Z)
+                    bool isSky = rawDepth < 0.000001;
+                #else
+                    bool isSky = rawDepth > 0.999999;
+                #endif
 
-                float edge = abs(l - lx) + abs(l - ly);
-                return saturate(edge * 8.0);
+                if (isSky)
+                    return 0.0;
+
+                float lineFade = GetLineFade(sceneDepth);
+
+                // 远处线条略细，防止城市楼群糊成大块黑色
+                float thicknessScale = lerp(0.5, 1.0, lineFade);
+                float2 ts = (_LineThickness * thicknessScale) / _ScreenParams.xy;
+
+                float depthEdge = RobertsCrossDepth(uv, ts);
+                float normalEdge = RobertsCrossNormal(uv, ts);
+                float colorEdge = RobertsCrossLuma(uv, ts);
+
+                float d = step(max(_DepthThreshold, 0.000001), depthEdge);
+                float n = step(max(_NormalThreshold, 0.000001), normalEdge);
+                float c = step(max(_ColorThreshold, 0.000001), colorEdge);
+
+                return saturate(d + n + c);
             }
 
             half4 Frag(Varyings i) : SV_Target
@@ -238,32 +266,26 @@ Shader "Custom/PostProcess/Constructivism"
 
                 float noiseRate = SAMPLE_TEXTURE2D_X(_Noise, sampler_Noise, uv * _NoiseScale).r;
 
-                // 1. 基础旧纸色调
+                // 1. 基础构成主义 / 海报化色调
                 float3 finalColor = ConstructivismPosterize(luminance, noiseRate);
 
-                // 2. 暗部排线
-                float hatch = HatchPattern(uv, luminance);
-                finalColor = lerp(finalColor, finalColor * 0.45, hatch * _HatchStrength);
-
-                // 3. 边缘粗糙化：让硬切边更像纸片/油墨
-                float edge = EdgeMask(uv);
-                float rough = saturate(edge * (1.0 - noiseRate) * _EdgeRoughness);
-                finalColor = lerp(finalColor, _InkBlackColor.rgb, rough * 0.45);
-
-                // 4. 纸张颗粒
+                // 2. 纸张颗粒
                 finalColor *= lerp(1.0, noiseRate, _NoiseStrength);
 
-                // 5. 可选弱红色斜切，默认关闭
-                float redBlock = DiagonalMask(
-                    uv,
-                    float2(1.0, -0.55),
-                    _RedBlockOffset,
-                    _RedBlockSoftness
-                );
+                // 3. 三路边缘检测：Depth + Normal + Luma
+                float sceneDepth;
+                float edge = EdgeMask(uv, sceneDepth);
 
-                finalColor = lerp(finalColor, _RedColor.rgb, redBlock * _GeoStrength);
+                float lineFade = GetLineFade(sceneDepth);
 
-                // 6. 和原画混合
+                #if defined(_DEBUG_EDGE)
+                    return half4(edge.xxx, 1.0);
+                #endif
+
+                // 4. 墨线覆盖
+                finalColor = lerp(finalColor, _LineColor.rgb, edge * _LineIntensity * lineFade);
+
+                // 5. 和原画混合
                 finalColor = lerp(sceneColor, finalColor, _EffectIntensity);
 
                 return half4(saturate(finalColor), 1.0);

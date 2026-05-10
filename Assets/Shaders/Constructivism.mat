@@ -39,12 +39,15 @@ Material:
     m_Floats:
     - _BlackBandCenter: 0.18
     - _BlackBandWidth: 0.075
-    - _BlackThreshold: 0.133
-    - _CreamThreshold: 0.6
-    - _EdgeRoughness: 0.35
+    - _BlackThreshold: 0.109
+    - _ColorThreshold: 0.196
+    - _CreamThreshold: 0.43
+    - _DebugEdge: 0
+    - _DepthThreshold: 0.1
+    - _EdgeRoughness: 0
     - _EffectIntensity: 1
     - _GeoStrength: 0.75
-    - _GrayThreshold: 0.414
+    - _GrayThreshold: 0.25
     - _HatchDensity: 5
     - _HatchShadowSoftness: 0.198
     - _HatchShadowStart: 0.408
@@ -52,9 +55,14 @@ Material:
     - _HatchWidth: 0.49
     - _JitterSpeed: 1.2
     - _JitterStrength: 0.001
+    - _LineFadeEnd: 100
+    - _LineFadeStart: 5
+    - _LineIntensity: 1
+    - _LineThickness: 1.71
     - _NoiseScale: 20
     - _NoiseStrength: 0.183
-    - _NoiseThresholdJitter: 0.035
+    - _NoiseThresholdJitter: 0.067
+    - _NormalThreshold: 1
     - _RayCount: 36
     - _RayStrength: 0.35
     - _RayWidth: 0.035
@@ -63,11 +71,12 @@ Material:
     - _StepLim: 0
     m_Colors:
     - _BlackColor: {r: 0.03, g: 0.025, b: 0.02, a: 1}
-    - _CreamColor: {r: 0.86, g: 0.78, b: 0.62, a: 1}
+    - _CreamColor: {r: 0.7484276, g: 0.64893943, b: 0.49659815, a: 1}
     - _FocusPoint: {r: 0.5, g: 0.5, b: 0, a: 0}
     - _GrayColor: {r: 0.27999997, g: 0.25999996, b: 0.21999997, a: 1}
     - _InkBlackColor: {r: 0.08176088, g: 0.06173112, b: 0.053735923, a: 1}
-    - _PaperColor: {r: 0.9622642, g: 0.8921381, b: 0.74136704, a: 1}
+    - _LineColor: {r: 0.02, g: 0.015, b: 0.01, a: 1}
+    - _PaperColor: {r: 1, g: 0.9470738, b: 0.80817604, a: 1}
     - _RedColor: {r: 0.75, g: 0.079999976, b: 0.04, a: 1}
-    - _WarmGrayColor: {r: 0.35999998, g: 0.33999997, b: 0.27999997, a: 1}
+    - _WarmGrayColor: {r: 1, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

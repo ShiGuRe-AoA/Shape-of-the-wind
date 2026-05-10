@@ -7,6 +7,7 @@ Shader "Custom/PostProcess/Blueprint"
         _BlueprintIntensity("Blueprint Intensity", Range(0,1)) = 1
 
         [Header(Edge)]
+        _EdgeColor("Edge Color", Color) = (0.85, 0.95, 1.00, 1)
         _EdgeScale("Edge Scale", Range(0,5)) = 1.5
         _EdgeFadeStrength("Edge Fade Strength", Range(0, 0.1)) = 0.05
         _DepthEdgeWeight("Depth Edge Weight", Range(0, 1)) = 0.5
@@ -17,6 +18,7 @@ Shader "Custom/PostProcess/Blueprint"
 
 
         [Header(Hatch Line)]
+        _HatchColor("Hatch Color", Color) = (0.02, 0.04, 0.10, 1)
         _HatchDensity("Hatch Density", Range(1,1000)) = 180
         _HatchStrength("Hatch Strength", Range(0,1)) = 0.15
         _HatchWidth("Hatch Width", Range(0.01,0.49)) = 0.12
@@ -28,6 +30,7 @@ Shader "Custom/PostProcess/Blueprint"
         _JitterSpeed("Jitter Speed", Range(0,20)) = 1.5
         
         [Header(Highlight Line)]
+        _HighlightLineColor("Highlight Line Color", Color) = (1.00, 1.00, 0.85, 1)
         _HighlightThreshold("Highlight Threshold", Range(0,1)) = 0.75
         _HighlightSoftness("Highlight Softness", Range(0.001,0.5)) = 0.08
         _HighlightLineDensity("Highlight Line Density", Range(5,1000)) = 260
@@ -79,15 +82,17 @@ Shader "Custom/PostProcess/Blueprint"
             float4 _BlueprintBaseColor;
             float _BlueprintIntensity;
 
+            float4 _EdgeColor;
             float _EdgeScale;
             float _EdgeFadeStrength;
-
+            
             float _DepthEdgeWeight;
             float _DepthEdgeThreshold;
             float _NormalEdgeWeight;
             float _NormalEdgeThreshold;
             float _LightEdgeWeight;
 
+            float4 _HatchColor;
             float _HatchDensity;
             float _HatchStrength;
             float _HatchWidth;
@@ -97,6 +102,7 @@ Shader "Custom/PostProcess/Blueprint"
             float _JitterStrength;
             float _JitterSpeed;
 
+            float4 _HighlightLineColor;
             float _HighlightThreshold;
             float _HighlightSoftness;
             float _HighlightLineDensity;
@@ -170,6 +176,17 @@ Shader "Custom/PostProcess/Blueprint"
                 return rgb;
             }
 
+            float3 LerpColorOKLAB(float3 fromColor, float3 toColor, float t)
+            {
+                t = saturate(t);
+
+                float3 fromLab = RGB2OKLAB(saturate(fromColor));
+                float3 toLab = RGB2OKLAB(saturate(toColor));
+
+                float3 lab = lerp(fromLab, toLab, t);
+                return saturate(OKLAB2RGB(lab));
+            }
+
             // ===== 深度采样 =====
             float SampleLinearDepthSafe(float2 uv)
             {
@@ -221,8 +238,8 @@ Shader "Custom/PostProcess/Blueprint"
                 float d3 = SampleLinearDepthSafe(uv + float2(0, offset.y));
                 float d4 = SampleLinearDepthSafe(uv - float2(0, offset.y));
 
-                float diff = abs(d1 - d0) + abs(d2 - d0) + abs(d3 - d0) + abs(d4 - d0);
-                //float diff = abs(4 * d0 - d1 - d2 - d3 - d4);
+                //float diff = abs(d1 - d0) + abs(d2 - d0) + abs(d3 - d0) + abs(d4 - d0);
+                float diff = abs(4 * d0 - d1 - d2 - d3 - d4);
 
                 float threshold = _DepthEdgeThreshold * thresholdScale;
                 
@@ -260,9 +277,9 @@ Shader "Custom/PostProcess/Blueprint"
                 float3 n3 = SampleSceneNormalSafe(uv + float2(0, offset.y));
                 float3 n4 = SampleSceneNormalSafe(uv - float2(0, offset.y));
 
-                float diff = distance(n0, n1) + distance(n0, n2) + distance(n0, n3) + distance(n0, n4);
+                //float diff = distance(n0, n1) + distance(n0, n2) + distance(n0, n3) + distance(n0, n4);
 
-                //float diff = abs(4 * n0 - n1 - n2 - n3 - n4);
+                float diff = abs(4 * n0 - n1 - n2 - n3 - n4);
 
                 float threshold = _NormalEdgeThreshold * thresholdScale;
                 
@@ -571,17 +588,21 @@ Shader "Custom/PostProcess/Blueprint"
                 float3 blueprintColor = _BlueprintBaseColor.rgb;
                 float3 finalColor = blueprintColor;
 
-                // 暗部斜线
-                finalColor -= hatch.xxx;
-                //finalColor += hatch.xxx;
+                // =====================
+                // OKLAB Color Lerp Lines
+                // =====================
 
-                // 轮廓白线
-                //finalColor -= edge.xxx;
-                finalColor += edge.xxx;
+                // hatch / edge / highlightLines 本身就是 mask。
+                // 0 = 不影响 finalColor
+                // 1 = 完全过渡到对应 Color
 
-                // 亮部扫描线
-                //finalColor -= highlightLines.xxx;
-                finalColor += highlightLines.xxx;
+                float hatchMask = saturate(hatch);
+                float edgeMask = saturate(edge);
+                float highlightMaskLine = saturate(highlightLines);
+
+                finalColor = LerpColorOKLAB(finalColor, _HatchColor.rgb, hatchMask);
+                finalColor = LerpColorOKLAB(finalColor, _EdgeColor.rgb, edgeMask);
+                finalColor = LerpColorOKLAB(finalColor, _HighlightLineColor.rgb, highlightMaskLine);
 
                 // 少量保留原场景信息，避免纯死蓝
                 float scenePreserve = (1.0 - _BlueprintIntensity) * 0.15;

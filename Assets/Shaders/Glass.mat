@@ -30,7 +30,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AngleOffset: 8
-    - _CellDensity: 120
+    - _CellDensity: 100
     - _DepthEdgeSoftness: 0.00001
     - _DepthEdgeStrength: 1
     - _DepthEdgeThreshold: 0.001
@@ -41,6 +41,7 @@ Material:
     - _LineWidth: 0
     - _StainedGlassScale: 10
     - _StainedGlassStrength: 0
+    - _WorldScale: 0.5
     m_Colors:
     - _LineColor: {r: 0.106918216, g: 0.106918216, b: 0.106918216, a: 0.9490196}
   m_BuildTextureStacks: []
