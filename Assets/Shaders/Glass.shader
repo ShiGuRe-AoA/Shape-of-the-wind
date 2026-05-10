@@ -6,11 +6,6 @@ Shader "Custom/URP/PostProcess/Glass"
         _CellDensity ("Cell Density", Range(1, 200)) = 40
         _AngleOffset ("Angle Offset", Range(0, 20)) = 5
 
-        [Header(Stained Glass)]
-        _StainedGlassTex ("Stained Glass Texture", 2D) = "white" {}
-        _StainedGlassStrength ("Stained Glass Strength", Range(0, 1)) = 0.5
-        _StainedGlassScale ("Stained Glass Scale", Range(0.1, 10)) = 1
-
         [Header(Edge)]
         _LineWidth ("Line Width", Range(0, 0.2)) = 0.02
         _LineSoftness ("Line Softness", Range(0.0001, 0.2)) = 0.02
@@ -63,10 +58,6 @@ Shader "Custom/URP/PostProcess/Glass"
 
             float _CellDensity;
             float _AngleOffset;
-
-            float4 _StainedGlassTex_ST;
-            float _StainedGlassStrength;
-            float _StainedGlassScale;
 
             float _LineWidth;
             float _LineSoftness;
@@ -460,24 +451,6 @@ Shader "Custom/URP/PostProcess/Glass"
                         sampler_BlitTexture,
                         controlPointUV1
                     );
-
-                float2 stainedUV = controlPointUV1 * _StainedGlassScale;
-                half3 stainedCol = SAMPLE_TEXTURE2D(
-                    _StainedGlassTex,
-                    sampler_StainedGlassTex,
-                    stainedUV
-                ).rgb;
-
-                // 保留屏幕明暗，只染色
-                //half luminance = dot(mosaicCol.rgb, half3(0.299, 0.587, 0.114));
-                half luminance = RGB2OKLAB(mosaicCol.rgb).r;
-                half3 stainedGlassCol = stainedCol * luminance * 1.5;
-
-                mosaicCol.rgb = lerp(
-                    mosaicCol.rgb,
-                    stainedGlassCol,
-                    _StainedGlassStrength
-                );
 
                 //----------------------------------------
                 // edge mask

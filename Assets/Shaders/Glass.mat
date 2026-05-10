@@ -35,7 +35,7 @@ Material:
     - _DepthEdgeStrength: 1
     - _DepthEdgeThreshold: 0.001
     - _DriftAmount: 2
-    - _DriftSpeed: 2
+    - _DriftSpeed: 0
     - _EffectStrength: 1
     - _LineSoftness: 0.0001
     - _LineWidth: 0

@@ -22,13 +22,13 @@ MonoBehaviour:
     - material: {fileID: 2100000, guid: e2ff250a3dadd4641a513a71df6b466d, type: 2}
       available: 0
     - material: {fileID: 2100000, guid: c3d9bab43a325ee43a9b7a33b3cefcd2, type: 2}
-      available: 1
-    - material: {fileID: 2100000, guid: 5320f66d08bff454692c2cd2aee8bdaf, type: 2}
-      available: 1
-    - material: {fileID: 2100000, guid: 9c60dffc2b09b324ebe3b535b7996cb5, type: 2}
-      available: 1
-    - material: {fileID: 2100000, guid: ea9a01909ee9ea341b18173b8964a755, type: 2}
       available: 0
+    - material: {fileID: 2100000, guid: 5320f66d08bff454692c2cd2aee8bdaf, type: 2}
+      available: 0
+    - material: {fileID: 2100000, guid: 9c60dffc2b09b324ebe3b535b7996cb5, type: 2}
+      available: 0
+    - material: {fileID: 2100000, guid: ea9a01909ee9ea341b18173b8964a755, type: 2}
+      available: 1
     - material: {fileID: 2100000, guid: 01342dcf96ef6e94e8bc532dae6f64fb, type: 2}
       available: 0
     passEvent: 600

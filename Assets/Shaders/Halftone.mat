@@ -31,7 +31,7 @@ Material:
     m_Floats:
     - _DotSizeMax: 0.75
     - _DotSizeMin: 0
-    - _HalftoneScale: 4
+    - _HalftoneScale: 8
     - _HalftoneSoftness: 0.05
     - _HalftoneStrength: 1
     - _NoiseScale: 9.2

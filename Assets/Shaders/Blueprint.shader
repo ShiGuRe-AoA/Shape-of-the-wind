@@ -222,6 +222,7 @@ Shader "Custom/PostProcess/Blueprint"
                 float d4 = SampleLinearDepthSafe(uv - float2(0, offset.y));
 
                 float diff = abs(d1 - d0) + abs(d2 - d0) + abs(d3 - d0) + abs(d4 - d0);
+                //float diff = abs(4 * d0 - d1 - d2 - d3 - d4);
 
                 float threshold = _DepthEdgeThreshold * thresholdScale;
                 
@@ -259,11 +260,9 @@ Shader "Custom/PostProcess/Blueprint"
                 float3 n3 = SampleSceneNormalSafe(uv + float2(0, offset.y));
                 float3 n4 = SampleSceneNormalSafe(uv - float2(0, offset.y));
 
-                float diff =
-                    distance(n0, n1) +
-                    distance(n0, n2) +
-                    distance(n0, n3) +
-                    distance(n0, n4);
+                float diff = distance(n0, n1) + distance(n0, n2) + distance(n0, n3) + distance(n0, n4);
+
+                //float diff = abs(4 * n0 - n1 - n2 - n3 - n4);
 
                 float threshold = _NormalEdgeThreshold * thresholdScale;
                 
