@@ -119,7 +119,7 @@ public class PlayerInput : MonoBehaviour
         ApplyYawByInclination(inclination);
 
         rb.MovePosition(transform.position + transform.forward * currentSpeed * Time.deltaTime);
-       // Debug.Log($"Wingspan: {wingspan}, Inclination: {inclination}, Normal: {normal}");
+        // Debug.Log($"Wingspan: {wingspan}, Inclination: {inclination}, Normal: {normal}");
 
 
 
@@ -157,7 +157,7 @@ public class PlayerInput : MonoBehaviour
 
         float horizontalFlapLift = leftFlapSpeed - rightFlapSpeed;
         float verticalFlapLift = leftFlapSpeed + rightFlapSpeed;
-        if(verticalFlapLift < 0) { verticalFlapLift *= 0.2f; }
+        if (verticalFlapLift < 0) { verticalFlapLift *= 0.2f; }
 
         return new Vector3(horizontalFlapLift, verticalFlapLift, 0);
     }

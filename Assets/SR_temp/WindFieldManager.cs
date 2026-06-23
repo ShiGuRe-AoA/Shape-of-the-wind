@@ -1,106 +1,149 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
+/// <summary>
+/// 将 WindProbe 按空间网格分类，并计算指定位置的合成风。
+/// </summary>
 public class WindFieldManager
 {
     public float cellSize = 20f;
     public float sampleRadius = 20f;
 
-    public Dictionary<Vector3Int, List<WindProbe>> windProbeMap = new();
+    private readonly Dictionary<Vector3Int, List<WindProbe>>
+        windProbeMap = new();
 
-    public void Build(List<WindProbe> probes)
+    public void Build(IReadOnlyList<WindProbe> probes)
     {
         windProbeMap.Clear();
 
-        foreach (var probe in probes)
-        {
-            Vector3Int key = WorldToCell(probe.transform.position);
+        if (probes == null)
+            return;
 
-            if (!windProbeMap.TryGetValue(key, out var list))
+        for (int i = 0; i < probes.Count; i++)
+        {
+            WindProbe probe = probes[i];
+
+            if (probe == null)
+                continue;
+
+            Vector3Int key =
+                WorldToCell(probe.transform.position);
+
+            if (!windProbeMap.TryGetValue(
+                    key,
+                    out List<WindProbe> list))
             {
                 list = new List<WindProbe>();
-                windProbeMap[key] = list;
+                windProbeMap.Add(key, list);
             }
 
             list.Add(probe);
         }
     }
 
-    public Vector3Int WorldToCell(Vector3 pos)
+    public Vector3Int WorldToCell(Vector3 position)
     {
+        float safeCellSize =
+            Mathf.Max(cellSize, 0.01f);
+
         return new Vector3Int(
-            Mathf.FloorToInt(pos.x / cellSize),
-            Mathf.FloorToInt(pos.y / cellSize),
-            Mathf.FloorToInt(pos.z / cellSize)
+            Mathf.FloorToInt(position.x / safeCellSize),
+            Mathf.FloorToInt(position.y / safeCellSize),
+            Mathf.FloorToInt(position.z / safeCellSize)
         );
     }
 
-    //返回计算过的风效果
-    public Vector3 WindEffect(Vector3 worldPos)
+    /// <summary>
+    /// 返回指定世界位置受到的合成风加速度。
+    /// </summary>
+    public Vector3 WindEffect(Vector3 worldPosition)
     {
-        Vector3Int center = WorldToCell(worldPos);
-        Vector3 totalWindEffect = Vector3.zero;
+        float safeCellSize =
+            Mathf.Max(cellSize, 0.01f);
 
-        int searchRange = Mathf.CeilToInt(sampleRadius / cellSize);
+        float safeRadius =
+            Mathf.Max(sampleRadius, 0.01f);
 
-        for (int x = -searchRange; x <= searchRange; x++)
+        Vector3Int center =
+            WorldToCell(worldPosition);
+
+        Vector3 totalWind =
+            Vector3.zero;
+
+        int searchRange =
+            Mathf.CeilToInt(
+                safeRadius / safeCellSize
+            );
+
+        float radiusSqr =
+            safeRadius * safeRadius;
+
+        for (int x = -searchRange;
+             x <= searchRange;
+             x++)
         {
-            for (int y = -searchRange; y <= searchRange; y++)
+            for (int y = -searchRange;
+                 y <= searchRange;
+                 y++)
             {
-                for (int z = -searchRange; z <= searchRange; z++)
+                for (int z = -searchRange;
+                     z <= searchRange;
+                     z++)
                 {
-                    Vector3Int key = new Vector3Int(
-                        center.x + x,
-                        center.y + y,
-                        center.z + z
-                        );
+                    Vector3Int key =
+                        center +
+                        new Vector3Int(x, y, z);
 
-                    if (!windProbeMap.TryGetValue(key, out var list))
-                        continue;
-
-                    foreach (var probe in list)
+                    if (!windProbeMap.TryGetValue(
+                            key,
+                            out List<WindProbe> probes))
                     {
-                        float distance = Vector3.Distance(worldPos, probe.transform.position);
+                        continue;
+                    }
 
-                        if (distance > sampleRadius)
+                    for (int i = 0;
+                         i < probes.Count;
+                         i++)
+                    {
+                        WindProbe probe =
+                            probes[i];
+
+                        if (probe == null)
                             continue;
 
-                        float weight = Mathf.Clamp01(1f - distance / sampleRadius);
-                        
-                        Vector3 direction = probe.windDirection.normalized;
-                        totalWindEffect += direction * probe.windStrength * weight;
+                        Vector3 offset =
+                            probe.transform.position -
+                            worldPosition;
+
+                        float distanceSqr =
+                            offset.sqrMagnitude;
+
+                        if (distanceSqr > radiusSqr)
+                            continue;
+
+                        float distance =
+                            Mathf.Sqrt(distanceSqr);
+
+                        float weight =
+                            Mathf.Clamp01(
+                                1f -
+                                distance / safeRadius
+                            );
+
+                        // 平滑衰减，避免进入探针范围时风力突变。
+                        weight =
+                            weight *
+                            weight *
+                            (3f - 2f * weight);
+
+                        totalWind +=
+                            probe.GetWindVector() *
+                            weight;
                     }
                 }
             }
         }
-        return totalWindEffect;
+
+        return totalWind;
     }
-
-    //返回附近的风探针列表
-    //public List<WindProbe> SampleWindProbes(Vector3 worldPos)
-    //{
-    //    Vector3Int center = WorldToCell(worldPos);
-
-    //    List<WindProbe> result = new List<WindProbe>();
-    //    for (int x = -1; x <= 1; x++)
-    //    {
-    //        for (int y = -1; y <= 1; y++)
-    //        {
-    //            for (int z = -1; z <= 1; z++)
-    //            {
-    //                Vector3Int key = center + new Vector3Int(x, y, z);
-    //                if (!windProbeMap.TryGetValue(key, out var list))
-    //                    continue;
-
-    //                foreach (var probe in list)
-    //                {
-    //                    result.Add(probe);
-    //                }
-    //            }
-    //        }
-    //    }
-    //    return result;
-    //}
 }

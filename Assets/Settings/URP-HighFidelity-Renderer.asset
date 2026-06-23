@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0076084db6497947aa79ef9d1fd5698, type: 3}
   m_Name: PostProcessRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     materials:
     - material: {fileID: 2100000, guid: f4199275b1eadf34dbeb5b394a2a45c9, type: 2}
-      available: 0
-    - material: {fileID: 2100000, guid: db90b4b179473ce47be70663dbf5cf57, type: 2}
       available: 1
+    - material: {fileID: 2100000, guid: db90b4b179473ce47be70663dbf5cf57, type: 2}
+      available: 0
     - material: {fileID: 2100000, guid: e2ff250a3dadd4641a513a71df6b466d, type: 2}
+      available: 0
+    - material: {fileID: 2100000, guid: 9c60dffc2b09b324ebe3b535b7996cb5, type: 2}
       available: 0
     - material: {fileID: 2100000, guid: c3d9bab43a325ee43a9b7a33b3cefcd2, type: 2}
       available: 0
     - material: {fileID: 2100000, guid: 5320f66d08bff454692c2cd2aee8bdaf, type: 2}
-      available: 0
-    - material: {fileID: 2100000, guid: 9c60dffc2b09b324ebe3b535b7996cb5, type: 2}
       available: 0
     - material: {fileID: 2100000, guid: ea9a01909ee9ea341b18173b8964a755, type: 2}
       available: 0
@@ -108,7 +108,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
   - {fileID: -7478946241567868536}
-  m_RendererFeatureMap: adc0de57c6d2eee588b91ab904723598
+  - {fileID: 555214692772491213}
+  m_RendererFeatureMap: adc0de57c6d2eee588b91ab904723598cd2fc848d284b407
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -157,3 +158,49 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
+--- !u!114 &555214692772491213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2346b17cc2367249a6928ce96112638, type: 3}
+  m_Name: PostProcessRenderFeatureNew
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    persistentBefore:
+    - available: 1
+      material: {fileID: 2100000, guid: db90b4b179473ce47be70663dbf5cf57, type: 2}
+      passName: 
+    - available: 1
+      material: {fileID: 2100000, guid: e2ff250a3dadd4641a513a71df6b466d, type: 2}
+      passName: 
+    fromStyle:
+      useOriginal: 1
+      passes:
+      - available: 0
+        material: {fileID: 2100000, guid: 01342dcf96ef6e94e8bc532dae6f64fb, type: 2}
+        passName: 
+    toStyle:
+      useOriginal: 1
+      passes:
+      - available: 0
+        material: {fileID: 2100000, guid: 01342dcf96ef6e94e8bc532dae6f64fb, type: 2}
+        passName: 
+    compositeMaterial: {fileID: 2100000, guid: 96306ff8480aa464a8b4057c51db3627, type: 2}
+    compositePassName: StyleTransition
+    persistentAfter:
+    - available: 0
+      material: {fileID: 0}
+      passName: 
+    - available: 0
+      material: {fileID: 0}
+      passName: 
+    passEvent: 600
+    renderInSceneView: 1
+    requireDepth: 1
+    requireNormals: 1
