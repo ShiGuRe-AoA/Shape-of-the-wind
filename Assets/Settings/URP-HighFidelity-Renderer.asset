@@ -30,10 +30,30 @@ MonoBehaviour:
     - material: {fileID: 2100000, guid: ea9a01909ee9ea341b18173b8964a755, type: 2}
       available: 0
     - material: {fileID: 2100000, guid: 01342dcf96ef6e94e8bc532dae6f64fb, type: 2}
-      available: 1
+      available: 0
     - material: {fileID: 2100000, guid: 4c4d6d7e8fa484e49b04742824121df3, type: 2}
       available: 0
     passEvent: 600
+--- !u!114 &-2697779108701508565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f87f1a06ca51e445885af3fbac423c2, type: 3}
+  m_Name: LRTGIRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    renderPassEvent: 500
+    compositeShader: {fileID: 4800000, guid: f1565dec76bd192429c1e818a6002693, type: 3}
+    indirectIntensity: 1
+    occlusionStrength: 0.6
+    maxGI: 4
+  _material: {fileID: 0}
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0

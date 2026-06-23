@@ -29,8 +29,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AngleOffset: 8
-    - _CellDensity: 100
+    - _AngleOffset: 7.8
+    - _CellDensity: 110
     - _DepthEdgeSoftness: 0.00001
     - _DepthEdgeStrength: 1
     - _DepthEdgeThreshold: 0.001

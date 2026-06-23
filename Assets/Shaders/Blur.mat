@@ -25,8 +25,8 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _BlurRadius: 3
-    - _BlurStrength: 1
+    - _BlurRadius: 5
+    - _BlurStrength: 0.773
     - _DepthSigma: 0.1
     - _DepthThreshold: 0.0446
     - _UseBilateral: 5.95
