@@ -181,16 +181,10 @@ MonoBehaviour:
       passName: 
     fromStyle:
       useOriginal: 1
-      passes:
-      - available: 0
-        material: {fileID: 2100000, guid: 01342dcf96ef6e94e8bc532dae6f64fb, type: 2}
-        passName: 
+      passes: []
     toStyle:
       useOriginal: 1
-      passes:
-      - available: 0
-        material: {fileID: 2100000, guid: 01342dcf96ef6e94e8bc532dae6f64fb, type: 2}
-        passName: 
+      passes: []
     compositeMaterial: {fileID: 2100000, guid: 96306ff8480aa464a8b4057c51db3627, type: 2}
     compositePassName: StyleTransition
     persistentAfter:
