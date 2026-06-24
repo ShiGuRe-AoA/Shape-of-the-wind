@@ -29,7 +29,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DotSizeMax: 0.683
+    - _DotSizeMax: 0.68
     - _DotSizeMin: 0
     - _HalftoneScale: 3
     - _HalftoneSoftness: 0
