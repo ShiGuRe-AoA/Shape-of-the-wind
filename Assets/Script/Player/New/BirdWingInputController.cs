@@ -106,13 +106,13 @@ public class BirdWingInputController : MonoBehaviour
     [SerializeField]
     private float wingBoneTiltMultiplier = 1f;
 
-    [Tooltip("左翼骨骼局部空间的旋转轴。")]
+    [Tooltip("左翼骨骼局部空间的旋转轴。默认 X 轴（适用于翅膀骨骼朝向沿模型 X 轴延伸的常见绑定）。")]
     [SerializeField]
-    private Vector3 leftWingTiltAxis = Vector3.forward;
+    private Vector3 leftWingTiltAxis = Vector3.up;
 
-    [Tooltip("右翼骨骼局部空间的旋转轴。")]
+    [Tooltip("右翼骨骼局部空间的旋转轴。默认 X 轴。")]
     [SerializeField]
-    private Vector3 rightWingTiltAxis = Vector3.forward;
+    private Vector3 rightWingTiltAxis = Vector3.up;
 
     [Tooltip("骨骼倾角分布曲线。x 为骨骼归一化位置(0=根部,1=翼尖)，y 为该骨骼受倾角影响的比例。")]
     [SerializeField]
@@ -159,6 +159,13 @@ public class BirdWingInputController : MonoBehaviour
     private readonly List<Quaternion> rightWingInitialLocalRotations =
         new List<Quaternion>();
 
+    /// <summary>
+    /// 初始姿态是否已经被缓存。仅在第一次 Start 或显式 RecaptureInitialPose 后为 true。
+    /// 用于保证：所有骨骼旋转都基于"游戏开始那一刻"的初始 localRotation，
+    /// 而不是后续被本组件修改过的旋转。
+    /// </summary>
+    private bool initialPoseCaptured;
+
     // ---------------------------------------------------------------------
     // 公开只读属性
     // ---------------------------------------------------------------------
@@ -199,8 +206,8 @@ public class BirdWingInputController : MonoBehaviour
 
     private void Awake()
     {
-        CacheInitialBoneRotations();
-
+        // 仅做存在性检查，不在这里缓存初始姿态：
+        // 防止在 Awake 阶段骨骼层级 / 初始 Pose 尚未稳定时取到错误旋转。
         if (leftWingBones == null || leftWingBones.Count == 0)
         {
             Debug.LogWarning(
@@ -216,6 +223,14 @@ public class BirdWingInputController : MonoBehaviour
                 this
             );
         }
+    }
+
+    private void Start()
+    {
+        // 关键：在 Start 中缓存"游戏开始那一刻"骨骼的真实初始 localRotation。
+        // 此时模型导入旋转、父物体变换、其他 Awake 中可能的姿态初始化均已完成。
+        // 之后所有骨骼旋转都基于这份缓存重算，确保非零初始旋转被尊重，且不会逐帧累积。
+        CacheInitialBoneRotations();
     }
 
     private void OnValidate()
@@ -379,6 +394,33 @@ public class BirdWingInputController : MonoBehaviour
                 );
             }
         }
+
+        initialPoseCaptured = true;
+    }
+
+    /// <summary>
+    /// 重新把当前左右翼骨骼的 localRotation 作为"初始姿态基准"重新缓存。
+    /// 适用场景：
+    /// - 运行时切换 / 重绑骨骼后；
+    /// - 美术在运行时修改了模型初始 Pose 并希望立刻生效；
+    /// - 一些需要把鸟"复位"到当前姿态、之后再按倾角偏移的玩法流程。
+    /// 调用前请确保骨骼已经处于你想作为"零倾角"基准的姿态。
+    /// </summary>
+    public void RecaptureInitialPose()
+    {
+        CacheInitialBoneRotations();
+    }
+
+    /// <summary>
+    /// 运行时重新指派左右翼骨骼，并自动以新骨骼的当前姿态作为初始基准。
+    /// </summary>
+    public void SetWingBones(
+        List<Transform> newLeftWingBones,
+        List<Transform> newRightWingBones)
+    {
+        leftWingBones = newLeftWingBones ?? new List<Transform>();
+        rightWingBones = newRightWingBones ?? new List<Transform>();
+        CacheInitialBoneRotations();
     }
 
     private void ApplyWingBoneRotations()
@@ -410,8 +452,12 @@ public class BirdWingInputController : MonoBehaviour
         if (bones == null || bones.Count == 0)
             return;
 
-        // 防御：如果初始旋转缓存因外部改动数量不匹配，则重新缓存一次。
-        if (initialRotations.Count != bones.Count)
+        // 若尚未缓存过初始姿态（例如外部在 Start 之前就调用了 ApplyInput），
+        // 用当前 localRotation 作为基准缓存一次。
+        // 注意：如果是因为外部已经把骨骼数量改了，不能直接重新缓存——
+        // 那样会把"已被本组件偏移过的姿态"误当作初始姿态。
+        // 推荐做法是外部改完骨骼后显式调用 SetWingBones / RecaptureInitialPose。
+        if (!initialPoseCaptured)
         {
             CacheInitialBoneRotations();
         }
@@ -432,6 +478,12 @@ public class BirdWingInputController : MonoBehaviour
             if (bone == null)
                 continue;
 
+            // 缓存与当前骨骼数量不匹配时退化为 identity，避免索引越界。
+            // 不再就地重新缓存，防止用偏移后的姿态污染初始基准。
+            Quaternion initialRot = i < initialRotations.Count
+                ? initialRotations[i]
+                : Quaternion.identity;
+
             float normalizedIndex = count <= 1
                 ? 1f
                 : i / (float)(count - 1);
@@ -450,9 +502,10 @@ public class BirdWingInputController : MonoBehaviour
             Quaternion offset =
                 Quaternion.AngleAxis(angle, normalizedAxis);
 
-            // 关键：始终基于初始局部旋转叠加，避免逐帧累积。
-            bone.localRotation =
-                initialRotations[i] * offset;
+            // 关键：始终基于"初始局部旋转"叠加，避免逐帧累积。
+            // 对带有非零初始 rotation 的骨骼也成立——初始姿态会被完整保留，
+            // 倾角偏移只在初始姿态的局部坐标系下增量叠加。
+            bone.localRotation = initialRot * offset;
         }
     }
 
