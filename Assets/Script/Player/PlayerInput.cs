@@ -9,31 +9,31 @@ public class PlayerInput : MonoBehaviour
     [Header("Lift")]
 
     [SerializeField]
-    private float flapLiftCoefficient = 5.8f; // ÅÄÒíÉıÁ¦ÏµÊı
+    private float flapLiftCoefficient = 5.8f; // æ‹ç¿¼å‡åŠ›ç³»æ•°
 
     [SerializeField]
-    private float windLiftCoefficient = 2f; // Õ¹Òí²úÉúµÄ³ÖĞøÉıÁ¦
+    private float windLiftCoefficient = 2f; // å±•ç¿¼äº§ç”Ÿçš„æŒç»­å‡åŠ›
 
-    [Tooltip("ÅÄÒíĞ§¹û±¶ÂÊ¡£1ÎªÔ­Ê¼Ğ§¹û£¬0.8±íÊ¾¼õÈõ20%¡£")]
+    [Tooltip("æ‹ç¿¼æ•ˆæœå€ç‡ã€‚1ä¸ºåŸå§‹æ•ˆæœï¼Œ0.8è¡¨ç¤ºå‡å¼±20%ã€‚")]
     [SerializeField, Range(0f, 1f)]
     private float flapEffectMultiplier = 0.8f;
 
     [Header("Forward Movement")]
 
     [SerializeField]
-    private float forwardAcceleration = 2f; // Ç°½ø¼ÓËÙ¶È
+    private float forwardAcceleration = 2f; // å‰è¿›åŠ é€Ÿåº¦
 
     [SerializeField]
-    private float backwardAcceleration = -5f; // ¼õËÙ¼ÓËÙ¶È
+    private float backwardAcceleration = -5f; // å‡é€ŸåŠ é€Ÿåº¦
 
     [SerializeField]
-    private float constantAcceleration = -0.1f; // ºã¶¨¼õËÙ¼ÓËÙ¶È
+    private float constantAcceleration = -0.1f; // æ’å®šå‡é€ŸåŠ é€Ÿåº¦
 
     [SerializeField]
-    private float maxSpeed = 8f; // ×î¿ìËÙ¶È
+    private float maxSpeed = 8f; // æœ€å¿«é€Ÿåº¦
 
     [SerializeField]
-    private float minSpeed = 0.1f; // ×îÂıËÙ¶È
+    private float minSpeed = 0.1f; // æœ€æ…¢é€Ÿåº¦
 
     [Header("Gravity")]
 
@@ -42,19 +42,15 @@ public class PlayerInput : MonoBehaviour
 
     [Header("Wind Field")]
 
-    [Tooltip("³¡¾°ÖĞµÄ·ç³¡¹ÜÀí¶ÔÏó¡£")]
-    [SerializeField]
-    private WindTest windField;
-
-    [Tooltip("·ç³¡ÏòÉÏ¡¢ÏòÏÂ·ÖÁ¿¶ÔÍæ¼ÒµÄÓ°Ïì±¶ÂÊ¡£")]
+    [Tooltip("é£åœºå‘ä¸Šã€å‘ä¸‹åˆ†é‡å¯¹ç©å®¶çš„å½±å“å€ç‡ã€‚")]
     [SerializeField, Range(0f, 1f)]
     private float verticalWindInfluence = 0.35f;
 
-    [Tooltip("·ç³¡Ë®Æ½·½Ïò¶ÔÍæ¼ÒµÄÓ°Ïì±¶ÂÊ¡£Ğ¡µØÍ¼½¨Òé±£³Ö½ÏµÍ¡£")]
+    [Tooltip("é£åœºæ°´å¹³æ–¹å‘å¯¹ç©å®¶çš„å½±å“å€ç‡ã€‚å°åœ°å›¾å»ºè®®ä¿æŒè¾ƒä½ã€‚")]
     [SerializeField, Range(0f, 1f)]
     private float horizontalWindInfluence = 0.05f;
 
-    [Tooltip("ÏŞÖÆ¶à¸ö·çÌ½ÕëÖØµşÊ±µÄ×î´ó·ç¼ÓËÙ¶È¡£")]
+    [Tooltip("é™åˆ¶å¤šä¸ªé£æ¢é’ˆé‡å æ—¶çš„æœ€å¤§é£åŠ é€Ÿåº¦ã€‚")]
     [SerializeField, Min(0f)]
     private float maxWindAcceleration = 4f;
 
@@ -74,10 +70,10 @@ public class PlayerInput : MonoBehaviour
     private Vector2 rightWingInput;
     private Vector2 rightWingInput_previous;
 
-    private float inclination; // Çã½Ç
-    private Vector3 normal; // ·¨ÏßÏòÁ¿
-    private float wingspan; // ÒíÕ¹
-    private Vector3 flapLift; // ÅÄÒíÉıÁ¦
+    private float inclination; // å€¾è§’
+    private Vector3 normal; // æ³•çº¿å‘é‡
+    private float wingspan; // ç¿¼å±•
+    private Vector3 flapLift; // æ‹ç¿¼å‡åŠ›
 
     private bool speedUp;
     private bool speedDown;
@@ -99,7 +95,7 @@ public class PlayerInput : MonoBehaviour
         if (rb == null)
         {
             Debug.LogError(
-                "[PlayerInput] µ±Ç°¶ÔÏóÃ»ÓĞ Rigidbody¡£",
+                "[PlayerInput] å½“å‰å¯¹è±¡æ²¡æœ‰ Rigidbodyã€‚",
                 this
             );
 
@@ -121,7 +117,7 @@ public class PlayerInput : MonoBehaviour
             inputActions.Main.SpeedDown.canceled += SpeedDown_canceled;
         }
 
-        // µ±Ç°½Å±¾ÒÑ¾­ÊÖ¶¯Ê©¼ÓÖØÁ¦¡£
+        // å½“å‰è„šæœ¬å·²ç»æ‰‹åŠ¨æ–½åŠ é‡åŠ›ã€‚
         rb.useGravity = false;
 
         currentSpeed = minSpeed;
@@ -382,24 +378,24 @@ public class PlayerInput : MonoBehaviour
 
     private void ApplyYawByInclination(float inclination)
     {
-        // Çã½ÇËÀÇø£¬±ÜÃâÇáÎ¢¶¶¶¯¡£
+        // å€¾è§’æ­»åŒºï¼Œé¿å…è½»å¾®æŠ–åŠ¨ã€‚
         if (Mathf.Abs(inclination) < 1f)
             return;
 
-        // ×î´ó¿É²ÎÓë¼ÆËãµÄÇã½Ç¡£
+        // æœ€å¤§å¯å‚ä¸è®¡ç®—çš„å€¾è§’ã€‚
         float maxInclination = 60f;
 
-        // ×î´ó×ªÏòËÙ¶È£¬µ¥Î»Îª¶È/Ãë¡£
+        // æœ€å¤§è½¬å‘é€Ÿåº¦ï¼Œå•ä½ä¸ºåº¦/ç§’ã€‚
         float maxYawSpeed = 120f;
 
-        // ½« inclination Ó³Éäµ½ -1 ~ 1¡£
+        // å°† inclination æ˜ å°„åˆ° -1 ~ 1ã€‚
         float t = Mathf.Clamp(
             inclination / maxInclination,
             -1f,
             1f
         );
 
-        // ÕıÖµÄæÊ±Õë£¬¸ºÖµË³Ê±Õë¡£
+        // æ­£å€¼é€†æ—¶é’ˆï¼Œè´Ÿå€¼é¡ºæ—¶é’ˆã€‚
         float yawDelta =
             -t *
             maxYawSpeed *
@@ -425,8 +421,8 @@ public class PlayerInput : MonoBehaviour
             flapLift.x *
             flapEffectMultiplier;
 
-        // ÅÄÒí²úÉúËÙ¶ÈÔöÁ¿¡£
-        // Í¨¹ı flapEffectMultiplier ÉÔÎ¢¼õÈõÅÄÒíĞ§¹û¡£
+        // æ‹ç¿¼äº§ç”Ÿé€Ÿåº¦å¢é‡ã€‚
+        // é€šè¿‡ flapEffectMultiplier ç¨å¾®å‡å¼±æ‹ç¿¼æ•ˆæœã€‚
         velocity +=
             transform.up *
             flapUp *
@@ -437,8 +433,8 @@ public class PlayerInput : MonoBehaviour
             lateral *
             Time.deltaTime;
 
-        // ³õ°æ»¬ÏèÉıÁ¦¡£
-        // Ä¿Ç°ÈÔÈ»ÊÇÒíÕ¹Ô½´ó£¬³ÖĞøÉıÁ¦Ô½Ç¿¡£
+        // åˆç‰ˆæ»‘ç¿”å‡åŠ›ã€‚
+        // ç›®å‰ä»ç„¶æ˜¯ç¿¼å±•è¶Šå¤§ï¼ŒæŒç»­å‡åŠ›è¶Šå¼ºã€‚
         velocity +=
             Vector3.up *
             windLiftCoefficient *
@@ -447,18 +443,18 @@ public class PlayerInput : MonoBehaviour
 
         ApplyWind(ref velocity);
 
-        // ÊÖ¶¯ÖØÁ¦¡£
+        // æ‰‹åŠ¨é‡åŠ›ã€‚
         velocity +=
             Vector3.down *
             gravitySpeed *
             Time.deltaTime;
 
-        // ÈË¹¤×èÄá£¬±ÜÃâÔ½·ÉÔ½¿ì¡£
+        // äººå·¥é˜»å°¼ï¼Œé¿å…è¶Šé£è¶Šå¿«ã€‚
         velocity.x *= 0.98f;
         velocity.z *= 0.98f;
         velocity.y *= 0.995f;
 
-        // ´¹Ö±ÏŞËÙ¡£
+        // å‚ç›´é™é€Ÿã€‚
         velocity.y = Mathf.Clamp(
             velocity.y,
             -10f,
@@ -470,25 +466,19 @@ public class PlayerInput : MonoBehaviour
 
     private void ApplyWind(ref Vector3 velocity)
     {
-        if (windField == null)
-        {
-            currentWind = Vector3.zero;
-            return;
-        }
-
         currentWind =
-            windField.SampleWind(
+            WindSampler.Sample(
                 rb.worldCenterOfMass
             );
 
-        // ·ÀÖ¹¶à¸öÌ½ÕëÖØµşÊ±·çÁ¦ÎŞÏŞµş¼Ó¡£
+        // é˜²æ­¢å¤šä¸ªæ¢é’ˆé‡å æ—¶é£åŠ›æ— é™å åŠ ã€‚
         Vector3 limitedWind =
             Vector3.ClampMagnitude(
                 currentWind,
                 maxWindAcceleration
             );
 
-        // ½«·ç²ğ³ÉÊúÖ±·ÖÁ¿ÓëË®Æ½·ÖÁ¿¡£
+        // å°†é£æ‹†æˆç«–ç›´åˆ†é‡ä¸æ°´å¹³åˆ†é‡ã€‚
         Vector3 verticalWind =
             Vector3.Project(
                 limitedWind,
@@ -501,8 +491,8 @@ public class PlayerInput : MonoBehaviour
                 Vector3.up
             );
 
-        // Ğ¡µØÍ¼ÖĞË®Æ½·çÓ°Ïì±£³Ö½ÏµÍ£¬
-        // ÉÏÉıÆøÁ÷µÄ×÷ÓÃ¸ü¼ÓÃ÷ÏÔ¡£
+        // å°åœ°å›¾ä¸­æ°´å¹³é£å½±å“ä¿æŒè¾ƒä½ï¼Œ
+        // ä¸Šå‡æ°”æµçš„ä½œç”¨æ›´åŠ æ˜æ˜¾ã€‚
         Vector3 appliedWind =
             verticalWind *
             verticalWindInfluence +

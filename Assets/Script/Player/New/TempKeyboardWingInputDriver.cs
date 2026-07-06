@@ -20,10 +20,9 @@ using UnityEngine.InputSystem;
 /// - 默认翼展拉满 = 1，可在 Inspector 调。
 ///
 /// 风力来源：
-/// - 若引用了 WindTest，则在 Update 中查询当前位置风并写入 BirdWingInputData.windForce。
+/// - 通过全局 WindSampler.Sample 查询当前位置风，并写入 BirdWingInputData.windForce。
 ///   这样 BirdWingInputController 与 BirdFlightController 都能拿到一致风力。
-/// - 若 BirdFlightController 自己也引用了 WindTest，则飞行控制器会自行采样，
-///   本驱动写入的 windForce 仅用于可视化与跨系统读取一致性。
+/// - 场景中若不存在 WindSampler，返回零向量。
 ///
 /// 不做的事：
 /// - 不读取任何玩法逻辑、不施力、不改风场、不改 BirdWingInputController 任何骨骼配置。
@@ -44,13 +43,6 @@ public class TempKeyboardWingInputDriver : MonoBehaviour
     )]
     [SerializeField]
     private BirdFlightController flightController;
-
-    [Tooltip(
-        "可选：场景风场。若赋值，则每帧把 SampleWind 结果写入 BirdWingInputData.windForce。\n" +
-        "BirdFlightController 也可独立查询风场；两边可同时配置，结果一致。"
-    )]
-    [SerializeField]
-    private WindTest windField;
 
     [Header("Flap Speed (绝对值)")]
 
@@ -272,11 +264,7 @@ public class TempKeyboardWingInputDriver : MonoBehaviour
         );
 
         // -------- 风力查询 --------
-        Vector3 windForce = Vector3.zero;
-        if (windField != null)
-        {
-            windForce = windField.SampleWind(transform.position);
-        }
+        Vector3 windForce = WindSampler.Sample(transform.position);
 
         // -------- 写入鸟翼输入控制器 --------
         BirdWingInputData data = new BirdWingInputData

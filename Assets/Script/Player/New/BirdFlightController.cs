@@ -30,11 +30,11 @@ public class BirdFlightController : MonoBehaviour
     private Rigidbody rb;
 
     [Tooltip(
-        "可选：场景风场。若赋值，则飞行控制器会自行调用 SampleWind 查询本帧风。\n" +
-        "若留空，将直接读取 BirdWingInputController.WindForce（由外部驱动者写入）。"
+        "风力获取来源。默认使用全局 WindSampler；若场景没有 WindSampler，" +
+        "则回退到 BirdWingInputController.WindForce（由外部驱动者写入）。"
     )]
     [SerializeField]
-    private WindTest windField;
+    private bool useGlobalWindSampler = true;
 
     // ---------------------------------------------------------------------
     // 拍翼主动升力
@@ -436,16 +436,17 @@ public class BirdFlightController : MonoBehaviour
     // ---------------------------------------------------------------------
 
     /// <summary>
-    /// 优先使用 windField.SampleWind 查询本帧风；若未配置 windField，
-    /// 则回退到 wingController.WindForce（由外部输入驱动者填入）。
+    /// 优先使用全局 <see cref="WindSampler"/> 查询本帧风；若场景没有可用采样器，
+    /// 或用户显式关闭 <c>useGlobalWindSampler</c>，则回退到
+    /// <see cref="BirdWingInputController.WindForce"/>（由外部输入驱动者填入）。
     /// </summary>
     private Vector3 ResolveWind()
     {
         Vector3 raw;
 
-        if (windField != null)
+        if (useGlobalWindSampler && WindSampler.Instance != null)
         {
-            raw = windField.SampleWind(rb.worldCenterOfMass);
+            raw = WindSampler.Sample(rb.worldCenterOfMass);
         }
         else
         {
